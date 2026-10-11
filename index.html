@@ -23,6 +23,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+html,body{overflow-x:hidden}
 body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--serif);font-size:1.2rem;line-height:1.55;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background:url("img/gen/parchment.jpg") center/600px repeat;opacity:.35;mix-blend-mode:multiply;z-index:0}
 body>*{position:relative;z-index:1}
@@ -65,7 +66,7 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 /* welcome */
 .welcome{padding:0 0 clamp(40px,6vw,70px);text-align:center}
 .welcome .garland{display:block;width:min(92vw,900px);margin:-2px auto 0;position:relative;z-index:1}
-@media (max-width:759px){.welcome .garland{width:100vw;max-width:none;margin-left:calc(-1 * var(--gutter))}}
+@media (max-width:759px){.welcome .garland{width:calc(100% + 2 * var(--gutter));max-width:none;margin-left:calc(-1 * var(--gutter))}}
 .welcome .names+p,.welcome .garland+p{margin-top:clamp(12px,2vw,24px)}
 .welcome p{max-width:620px;margin:0 auto;font-size:clamp(1.25rem,2.4vw,1.5rem)}
 .welcome p+p{margin-top:1em}
@@ -100,11 +101,11 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .event.right .veil{background:linear-gradient(270deg,var(--tint) 0%,var(--tint) 35%,var(--tint-soft) 60%,transparent 100%)}
 .event.right .text{margin-left:auto}
 @media (max-width:819px){
-  .event{padding:0 0 clamp(40px,8vw,56px)}
-  .event .bg{position:relative;inset:auto;height:56vw;max-height:300px;z-index:0}
+  .event{padding:0 0 clamp(40px,8vw,56px);overflow:hidden}
+  .event .bg{position:relative;inset:auto;height:56vw;max-height:300px;z-index:0;transform:none!important}
   .event .veil{background:none!important;display:none}
   .event .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,var(--solid) 100%)}
-  .event .wrap{margin-top:-10px}
+  .event .wrap{margin-top:-10px;position:relative;z-index:1}
   .event .text{max-width:none;margin:0}
   .event.right .text{margin-left:0}
 }
@@ -123,7 +124,7 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .cols h3{font-family:var(--caps);font-weight:400;font-size:1rem;letter-spacing:.22em;color:var(--gold-deep);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(199,162,74,.5)}
 .cols p{margin:0 0 .8em}
 .note{font-style:italic;color:var(--ink-soft)}
-.map{margin:clamp(36px,6vw,56px) auto 0;max-width:820px;border-radius:6px;box-shadow:0 20px 40px rgba(90,26,30,.18)}
+.map{display:block;width:100%;max-width:820px;height:auto;margin:clamp(36px,6vw,56px) auto 0;border-radius:6px;box-shadow:0 20px 40px rgba(90,26,30,.18)}
 
 /* invitation */
 .invite{padding:clamp(40px,7vw,80px) 0 clamp(56px,9vw,110px)}
@@ -188,7 +189,7 @@ footer{text-align:center;padding:40px var(--gutter) 90px;font-size:1rem;color:va
 footer img{width:60px;margin:0 auto 12px;opacity:.9}
 
 /* mobile sticky rsvp */
-.sticky{position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5);backdrop-filter:blur(8px)}
+.sticky{position:fixed;left:0;right:0;bottom:0;width:100%;box-sizing:border-box;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5);backdrop-filter:blur(8px)}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
 </style>
