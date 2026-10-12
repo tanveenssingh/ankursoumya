@@ -133,7 +133,7 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 /* envelope reveal (origami) */
 .reveal{margin-top:clamp(28px,5vw,48px)}
 .stage{position:relative;width:min(100%,520px,calc((100svh - 190px) * .707));aspect-ratio:1400/1980;margin:0 auto;perspective:1700px;container-type:inline-size}
-.env{position:absolute;left:14%;width:72%;bottom:13%;aspect-ratio:1380/1239;transform-style:preserve-3d;transform-origin:50% 100%;transition:transform 1.5s cubic-bezier(.4,0,.2,1);cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.env{position:absolute;left:14%;width:72%;bottom:13%;aspect-ratio:1380/1239;transform-style:preserve-3d;transform-origin:50% 100%;transform:translateY(-76%);transition:transform 1.1s cubic-bezier(.4,0,.2,1);cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
 .env:focus-visible{outline:2px solid var(--gold);outline-offset:14px}
 .env .ebody{position:absolute;inset:0;transform:translateZ(0);box-shadow:0 24px 50px rgba(21,57,64,.35)}
 .env .ebody img{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -159,13 +159,14 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .env .pocket{position:absolute;left:0;right:0;bottom:0;top:-220%;overflow:hidden;transform:translateZ(1px);pointer-events:none}
 .env .ecard{position:absolute;left:5%;width:90%;top:69.4%;aspect-ratio:1400/1980;border-radius:4px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25);transform:translateY(0);transition:transform 1.1s cubic-bezier(.3,0,.1,1)}
 .env .ecard img{display:block;width:100%;height:100%;object-fit:cover}
-.hint{position:absolute;left:0;right:0;bottom:1%;text-align:center;font-family:var(--caps);font-size:.72rem;letter-spacing:.3em;color:var(--ink-soft);animation:hint 2.4s ease-in-out infinite;pointer-events:none;transition:opacity .4s}
+.hint{position:absolute;left:0;right:0;top:100%;margin-top:7%;text-align:center;font-family:var(--caps);font-size:.72rem;letter-spacing:.3em;color:var(--ink-soft);animation:hint 2.4s ease-in-out infinite;pointer-events:none;transition:opacity .4s}
 @keyframes hint{0%,100%{opacity:.45}50%{opacity:1}}
 .env:hover .flap{transform:translateZ(3px) rotateX(176deg)}
 /* phases */
+.stage.drop .env{transform:translateY(0)}
 .stage.open .env .flap{transform:translateZ(0) rotateX(0)}
 .stage.open .hint{animation:none;opacity:0}
-.stage.unfold .env{transform:scale(.72)}
+.stage.unfold .env{transform:scale(.72);transition-duration:1.5s}
 .stage.unfold .env .door.l{transform:translateZ(2px) rotateY(-174deg)}
 .stage.unfold .env .door.r{transform:translateZ(2px) rotateY(174deg)}
 .stage.rise .env .ecard{transform:translateY(-74%)}
@@ -313,6 +314,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
             <img class="in" src="img/env/flap-in.webp" alt="" aria-hidden="true" loading="lazy">
             <div class="out"><img src="img/env/flap-out.webp" alt="" aria-hidden="true" loading="lazy"><div class="seal"><img src="img/monogram.png" alt=""></div></div>
           </div>
+          <div class="hint" id="hint">Tap to open</div>
         </div>
         <div class="slider" id="slider" aria-roledescription="carousel" aria-label="Invitation suite">
           <div class="track" id="track">
@@ -332,7 +334,6 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
           <button class="sarrow prev" id="sPrev" aria-label="Previous card">‹</button>
           <button class="sarrow next" id="sNext" aria-label="Next card">›</button>
         </div>
-        <div class="hint" id="hint">Tap to open</div>
       </div>
       <div class="sbar" id="sbar">
         <div class="dots" id="dots"></div>
@@ -552,10 +553,15 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
   // envelope sequence
   function open(){
     if(opened)return;opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');
-    if(reduce){stage.classList.add('open','unfold','rise','grow','done');slider.style.transform='';go(0);return}
-    stage.classList.add('open');
-    setTimeout(function(){stage.classList.add('unfold')},450);
-    setTimeout(function(){stage.classList.add('rise')},1750);
+    if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);return}
+    var drop=env.offsetHeight*.76,y0=window.scrollY,t0=performance.now(),root=document.documentElement,sb=root.style.scrollBehavior;
+    root.style.scrollBehavior='auto';env.style.transition='none';
+    (function step(now){var t=Math.min(1,(now-t0)/1100),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+      env.style.transform='translateY('+(-(1-e)*76)+'%)';window.scrollTo({top:y0+drop*e,behavior:'instant'});
+      if(t<1)requestAnimationFrame(step);else{root.style.scrollBehavior=sb;stage.classList.add('drop');env.style.transform='';void env.offsetWidth;env.style.transition=''}})(t0);
+    setTimeout(function(){stage.classList.add('open')},1000);
+    setTimeout(function(){stage.classList.add('unfold')},1450);
+    setTimeout(function(){stage.classList.add('rise')},2750);
     setTimeout(function(){
       var c=env.querySelector('.ecard').getBoundingClientRect(),s=slider.getBoundingClientRect();
       var sx=c.width/s.width,sy=c.height/s.height;
@@ -565,8 +571,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
       void slider.offsetWidth;
       slider.style.transition='';
       slider.style.transform='translate(0,0) scale(1)';
+      var st=stage.getBoundingClientRect().top;if(st<16)window.scrollBy({top:st-16,behavior:'smooth'});
       setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0)},1150);
-    },2850);
+    },3850);
   }
   env.addEventListener('click',open);
   env.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
