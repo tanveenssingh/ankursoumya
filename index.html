@@ -173,6 +173,12 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .stage.grow .env{opacity:0;transition:opacity .7s ease .25s,transform 1.5s;pointer-events:none}
 .stage.done .env,.stage.done .hint{display:none}
 
+/* gate: everything after the envelope stays hidden until it is opened */
+html.gated #invitation ~ *:not(.sticky):not(.lb){display:none}
+html.gated .nav ul{display:none!important}
+html.gated .invite{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.skip{display:none;margin:22px auto 0;background:none;border:0;color:var(--ink-soft);font-family:var(--caps);font-size:.62rem;letter-spacing:.25em;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+html.gated .stage:not(.done) ~ .skip{display:block}
 /* slider */
 .slider{position:absolute;inset:0;opacity:0;visibility:hidden;border-radius:6px;overflow:hidden;box-shadow:0 26px 60px rgba(90,26,30,.3);transform-origin:0 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .stage.grow .slider{opacity:1;visibility:visible;transition:transform 1.1s cubic-bezier(.3,0,.1,1),opacity .4s}
@@ -254,6 +260,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
 </style>
+<script>try{if(!localStorage.getItem("asOpened"))document.documentElement.classList.add("gated")}catch(e){}</script>
 </head>
 <body>
 
@@ -339,6 +346,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="dots" id="dots"></div>
         <div class="scap" id="scap">Cover · swipe or use the arrows · tap a card to enlarge</div>
       </div>
+      <button class="skip" id="skip" type="button">Skip the envelope</button>
     </div>
   </div>
 </section>
@@ -553,7 +561,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
   // envelope sequence
   function open(){
     if(opened)return;opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');
-    if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);return}
+    if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock();return}
     var drop=env.offsetHeight*.76,y0=window.scrollY,t0=performance.now(),root=document.documentElement,sb=root.style.scrollBehavior;
     root.style.scrollBehavior='auto';env.style.transition='none';
     (function step(now){var t=Math.min(1,(now-t0)/1100),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -572,9 +580,11 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
       slider.style.transition='';
       slider.style.transform='translate(0,0) scale(1)';
       var st=stage.getBoundingClientRect().top;if(st<16)window.scrollBy({top:st-16,behavior:'smooth'});
-      setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0)},1150);
+      setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0);unlock()},1150);
     },3850);
   }
+  function unlock(){try{localStorage.setItem('asOpened','1')}catch(e){}document.documentElement.classList.remove('gated')}
+  document.getElementById('skip').addEventListener('click',function(){opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock()});
   env.addEventListener('click',open);
   env.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
   // slider controls
