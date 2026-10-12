@@ -133,13 +133,13 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 /* envelope reveal */
 .reveal{margin-top:clamp(28px,5vw,48px)}
 .stage{position:relative;width:min(100%,520px,calc((100svh - 190px) * .707));aspect-ratio:1400/1980;margin:0 auto;perspective:1600px;container-type:inline-size}
-.env{position:absolute;left:11%;width:78%;bottom:13%;aspect-ratio:950/851;transform-style:preserve-3d;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.env{position:absolute;left:11%;width:78%;bottom:13%;aspect-ratio:1380/1239;transform-style:preserve-3d;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
 .env:focus-visible{outline:2px solid var(--gold);outline-offset:14px}
 .env .ebody{position:absolute;inset:0;transform:translateZ(2px);border-radius:2px;box-shadow:0 24px 50px rgba(21,57,64,.35)}
 .env .ebody img{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .9s ease}
 .env .eback{position:absolute;inset:0;background:#032C26;transition:opacity .9s ease}
 .env .eback::after{content:"";position:absolute;inset:2.7%;border:2px solid #EEB547;opacity:.95}
-.env .flap{position:absolute;left:0;bottom:100%;width:100%;aspect-ratio:950/404;transform-origin:50% 100%;transform:translateZ(3px) rotateX(180deg);transition:transform 1.25s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.env .flap{position:absolute;left:0;bottom:100%;width:100%;aspect-ratio:1380/585;transform-origin:50% 100%;transform:translateZ(3px) rotateX(180deg);transition:transform 1.25s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
 .env .flap .in,.env .flap .out{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .env .flap .in{display:block;object-fit:fill}
 .env .flap .out{transform:rotateX(180deg)}
@@ -156,7 +156,7 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .stage.open .env .flap{transform:translateZ(0) rotateX(0)}
 .stage.open .env .ebody img{opacity:1}
 .stage.open .env .eback{opacity:0}
-.stage.open .hint{opacity:0}
+.stage.open .hint{animation:none;opacity:0}
 .stage.rise .env .ecard{transform:translateY(-58%)}
 .stage.grow .env{opacity:0;transition:opacity .7s ease .25s;pointer-events:none}
 .stage.done .env,.stage.done .hint{display:none}
