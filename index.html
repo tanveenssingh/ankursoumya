@@ -260,7 +260,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
 </style>
-<script>try{if(!localStorage.getItem("asOpened"))document.documentElement.classList.add("gated")}catch(e){}</script>
+<script>document.documentElement.classList.add("gated")</script>
 </head>
 <body>
 
@@ -583,7 +583,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
       setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0);unlock()},1150);
     },3850);
   }
-  function unlock(){try{localStorage.setItem('asOpened','1')}catch(e){}document.documentElement.classList.remove('gated')}
+  function unlock(){document.documentElement.classList.remove('gated')}
   document.getElementById('skip').addEventListener('click',function(){opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock()});
   env.addEventListener('click',open);
   env.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
