@@ -11,13 +11,13 @@
 <link rel="icon" href="img/monogram.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Tangerine:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 :root{
   --parchment:#F4EBD6; --parchment-deep:#EADCBF; --ink:#5A1A1E; --ink-soft:#7A3A3E;
   --gold:#C7A24A; --gold-deep:#9C7A2A; --teal:#1F4E57; --teal-deep:#153940;
   --coral:#D9553E; --turmeric:#E7B22C; --midnight:#1B2A5A; --blush:#F0B7B2; --emerald:#0F4D3A;
-  --serif:"Cormorant Garamond", Georgia, serif; --caps:"Cinzel", "Cormorant Garamond", serif; --script:"Pinyon Script", "Cormorant Garamond", cursive;
+  --serif:"Cormorant Garamond", Georgia, serif; --caps:"Cinzel", "Cormorant Garamond", serif; --script:"Tangerine", "Cormorant Garamond", cursive;
   --max:1120px; --gutter:clamp(16px,4vw,48px);
 }
 *{box-sizing:border-box}
@@ -51,11 +51,11 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .hero .bg{position:absolute;inset:0;z-index:-2;background:var(--teal-deep) url("img/gen/hero.jpg") 60% center/cover no-repeat}
 .hero .veil{position:absolute;inset:0;z-index:-1;background:linear-gradient(to bottom,rgba(20,30,40,.35) 0%,rgba(20,30,40,.15) 45%,rgba(60,20,22,.72) 100%)}
 .hero .inner{padding:72px var(--gutter) 64px;max-width:760px}
-.hero .mono{width:min(44vw,220px);margin:0 auto 18px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.35))}
-.hero h1{font-family:var(--script);font-size:clamp(2.7rem,8.5vw,6rem);font-weight:400;letter-spacing:.01em;line-height:1.15;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.hero .mono{width:min(44vw,220px);margin:0 auto 18px;filter:brightness(0) invert(1) drop-shadow(0 4px 14px rgba(0,0,0,.45))}
+.hero h1{font-family:var(--script);font-size:clamp(3.8rem,12vw,8.4rem);font-weight:700;letter-spacing:.01em;line-height:1.15;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.45)}
 .hero h1 .amp{color:#fff;padding:0 .08em;font-size:.8em}
-.hero .when{font-family:var(--caps);font-size:clamp(.75rem,2.4vw,1rem);letter-spacing:.3em;text-transform:uppercase;margin:18px 0 6px;color:#F6E7C1}
-.hero .where{font-style:italic;font-size:clamp(1.15rem,3vw,1.5rem);color:#fff;opacity:.95}
+.hero .when{font-family:var(--caps);font-weight:600;font-size:clamp(1rem,3.2vw,1.4rem);text-shadow:0 2px 10px rgba(0,0,0,.5);letter-spacing:.3em;text-transform:uppercase;margin:18px 0 6px;color:#F6E7C1}
+.hero .where{font-style:italic;font-weight:600;font-size:clamp(1.5rem,4.2vw,2.1rem);text-shadow:0 2px 10px rgba(0,0,0,.5);color:#fff;opacity:.95}
 .count{display:flex;justify-content:center;gap:clamp(14px,4vw,36px);margin:34px 0 10px}
 .count div{display:grid;gap:2px}
 .count b{font-family:var(--caps);font-weight:400;font-size:clamp(1.6rem,5vw,2.6rem);line-height:1}
@@ -81,8 +81,9 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .event{position:relative;color:#fff;padding:clamp(56px,9vw,120px) 0;isolation:isolate;overflow:hidden}
 .event .bg{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
 .event .veil{position:absolute;inset:0;z-index:-1}
-.event .wrap{display:grid}
-.event .text{max-width:560px}
+.event .wrap{display:grid;max-width:1360px}
+.event .text{max-width:470px}
+.event .verse{font-style:italic;line-height:1.65;font-size:1.15rem}
 .event .om{font-family:var(--serif);font-size:2rem;line-height:1;color:#F6D98B;margin-bottom:10px}
 .event .day{font-family:var(--caps);font-size:.72rem;letter-spacing:.3em;opacity:.9}
 .event h3{font-family:var(--caps);font-weight:400;font-size:clamp(1.7rem,4.2vw,2.6rem);letter-spacing:.16em;margin:10px 0 4px;color:#F6D98B}
@@ -97,8 +98,8 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .event .cal{display:inline-block;margin-top:22px;font-family:var(--caps);font-size:.68rem;letter-spacing:.24em;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.7);padding:10px 18px;border-radius:2px}
 .event .cal:hover{background:rgba(255,255,255,.15)}
 /* text on the left: darken left; text on the right: darken right */
-.event.left .veil{background:linear-gradient(90deg,var(--tint) 0%,var(--tint) 35%,var(--tint-soft) 60%,transparent 100%)}
-.event.right .veil{background:linear-gradient(270deg,var(--tint) 0%,var(--tint) 35%,var(--tint-soft) 60%,transparent 100%)}
+.event.left .veil{background:linear-gradient(90deg,var(--tint) 0%,var(--tint) 46%,var(--tint-soft) 66%,transparent 92%)}
+.event.right .veil{background:linear-gradient(270deg,var(--tint) 0%,var(--tint) 46%,var(--tint-soft) 66%,transparent 92%)}
 .event.right .text{margin-left:auto}
 @media (max-width:819px){
   .event{padding:0 0 clamp(40px,8vw,56px);overflow:hidden}
@@ -111,9 +112,9 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 }
 .e-welcome{--solid:#B8402F;--tint:rgba(170,52,36,.92);--tint-soft:rgba(170,52,36,.45);background:#B8402F}
 .e-haldi{--solid:#C98E12;--tint:rgba(196,138,14,.9);--tint-soft:rgba(196,138,14,.4);background:#C98E12}
-.e-sangeet{--solid:#121B3F;--tint:rgba(16,24,66,.92);--tint-soft:rgba(16,24,66,.45);background:#121B3F}
+.e-sangeet{--solid:#10301F;--tint:rgba(14,44,30,.93);--tint-soft:rgba(14,44,30,.45);background:#10301F}
 .e-ceremony{--solid:#B0666B;--tint:rgba(168,76,90,.9);--tint-soft:rgba(168,76,90,.4);background:#B0666B}
-.e-reception{--solid:#0B3B2C;--tint:rgba(9,52,38,.92);--tint-soft:rgba(9,52,38,.45);background:#0B3B2C}
+.e-reception{--solid:#0E1D45;--tint:rgba(13,27,68,.93);--tint-soft:rgba(13,27,68,.45);background:#0E1D45}
 .farewell{text-align:center;padding:clamp(36px,6vw,64px) var(--gutter);font-style:italic;font-size:1.25rem}
 
 /* generic section */
@@ -191,10 +192,10 @@ html.gated .stage:not(.done) ~ .skip{display:block}
 .stage.done .cover-text{opacity:1}
 .cover-text .mono{position:absolute;left:50%;top:14.5%;width:28%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:rgba(250,244,230,.92);box-shadow:0 4px 18px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
 .cover-text .mono img{width:70%;height:auto}
-.cover-text .plate{position:absolute;left:9%;right:9%;bottom:6.5%;background:rgba(250,244,230,.93);border-radius:6px;border-radius:1.2cqw;padding:14px 12px 16px;padding:3.2cqw 3cqw 3.4cqw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.15)}
-.cover-text .wi{font-family:var(--script);font-size:2.4rem;font-size:9.2cqw;line-height:1;color:#8b1e3a}
-.cover-text .nm{font-family:var(--caps);font-size:1.1rem;font-size:4.2cqw;letter-spacing:.14em;color:#8b1e3a;margin-top:1.6cqw}
-.cover-text .dt{font-family:var(--caps);font-size:.75rem;font-size:2.9cqw;letter-spacing:.14em;color:#9a5a66;margin-top:1.2cqw}
+.cover-text .plate{position:absolute;left:9%;right:9%;bottom:6.5%;background:#7A0F16;border:1px solid rgba(233,185,73,.55);border-radius:6px;border-radius:1.2cqw;padding:14px 12px 16px;padding:3.2cqw 3cqw 3.4cqw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+.cover-text .wi{font-family:var(--script);font-size:3rem;font-size:12cqw;line-height:1;color:#E9B949;font-weight:700}
+.cover-text .nm{font-family:var(--caps);font-size:1.1rem;font-size:4.2cqw;letter-spacing:.14em;color:#E9B949;font-weight:600;margin-top:1.2cqw}
+.cover-text .dt{font-family:var(--caps);font-size:.75rem;font-size:2.9cqw;letter-spacing:.2em;color:#E9B949;margin-top:1.2cqw}
 .sarrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.7);background:rgba(21,57,64,.45);color:#fff;font-size:30px;line-height:40px;cursor:pointer;opacity:0;transition:opacity .3s;backdrop-filter:blur(4px)}
 .sarrow.prev{left:10px}.sarrow.next{right:10px}
 .stage.done .slider:hover .sarrow,.stage.done .slider:focus-within .sarrow{opacity:.9}
@@ -300,7 +301,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
     <img class="garland rv" src="img/gen/garland2.png" alt="">
     <p class="rv">Together with their families,</p>
     <div class="names rv rv-d1">Ankur Gupta &amp; Soumya Panda</div>
-    <p class="rv rv-d2">invite you to celebrate their wedding over four days in Bali. From a sunset welcome on the sand to vows at golden hour and a reception under the lanterns, we would love to have you with us for all of it.</p>
+    <p class="rv rv-d2">invite you to celebrate their wedding in Bali. From a sunset welcome on the sand to vows at golden hour and a reception under the lanterns, we would love to have you with us for all of it.</p>
     <div class="rule rv rv-d3"></div>
     <p class="note rv rv-d3">One RSVP covers the whole celebration.</p>
   </div>
@@ -354,7 +355,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 <section class="schedule" id="schedule">
   <div class="wrap">
     <h2 class="rv">The celebrations</h2>
-    <p class="lead rv rv-d1">Five events across three days. Add any of them to your calendar.</p>
+    <p class="lead rv rv-d1">Five events across three days. Add them to your calendar.</p>
   </div>
   <div class="events">
 
@@ -369,9 +370,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="orn"></div>
         <div class="time">6:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
-        <p>Sundowners, live music and dinner by the ocean as both families come together for the first time in Bali.</p>
-        <div class="attire"><span>Dress code</span>Resort chic. Linen, bright prints, sundresses, florals. Sandals welcome.</div>
-        <a class="cal" href="#" data-ics="Island Mehfil – Welcome Party|20270523T180000|20270523T230000|Welcome party for Ankur &amp; Soumya's wedding. Dress: resort chic.">Add to calendar</a>
+        <p class="verse">Sunset ka magic, samundar ka nazara,<br>Live music aur cocktails ka sahara.<br>Good vibes, great food aur pyaar beshumaar,<br>Let's kick off the wedding celebrations with a shaandaar shaam!</p>
+        <div class="attire"><span>Dress code</span>Details to follow…</div>
+        <a class="cal" href="#" data-ics="Island Mehfil – Welcome Party|20270523T180000|20270523T230000|Welcome party for Ankur &amp; Soumya's wedding. ">Add to calendar</a>
       </div></div>
     </article>
 
@@ -386,9 +387,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="orn"></div>
         <div class="time">10:00 am onwards</div>
         <div class="venue">Venue to follow</div>
-        <p>A morning of blessings, laughter and a little mess. Family and friends apply haldi to the couple for glow and good fortune, followed by brunch.</p>
-        <div class="attire"><span>Dress code</span>Shades of yellow and white. Wear something you don't mind getting turmeric on.</div>
-        <a class="cal" href="#" data-ics="Turmeric &amp; Tropics – Haldi|20270524T100000|20270524T130000|Haldi ceremony for Ankur &amp; Soumya. Dress: yellow and white.">Add to calendar</a>
+        <p class="verse">Haldi ka rang, apno ka pyaar,<br>Masti aur laughter ki hogi bahaar!<br>Dulha dulhan pe chadhega golden glow,<br>Blessings aur good vibes ka hoga flow!<br>Thodi si haldi, thoda sa hungama,<br>Brunch ke saath chalega khushiyon ka drama!</p>
+        <div class="attire"><span>Dress code</span>Details to follow…</div>
+        <a class="cal" href="#" data-ics="Turmeric &amp; Tropics – Haldi|20270524T100000|20270524T130000|Haldi ceremony for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
 
@@ -399,13 +400,13 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="om">ॐ</div>
         <div class="day">Monday, May 24</div>
         <h3>Rhythm &amp; Revelry</h3>
-        <div class="sub">Sangeet &amp; mehendi night</div>
+        <div class="sub">Sangeet night</div>
         <div class="orn"></div>
         <div class="time">7:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
-        <p>An evening of mehendi, performances from both families, dinner and dancing late into the night. Come ready to perform, or at least to cheer.</p>
-        <div class="attire"><span>Dress code</span>Festive Indian or cocktail. Jewel tones, sequins, lehengas, sherwanis, anything that moves on a dance floor.</div>
-        <a class="cal" href="#" data-ics="Rhythm &amp; Revelry – Sangeet|20270524T190000|20270525T000000|Sangeet and mehendi night for Ankur &amp; Soumya. Dress: festive Indian or cocktail.">Add to calendar</a>
+        <p class="verse">Music ki beats, sitaron bhari raat,<br>Friends and families honge ek saath!<br>Thumke lagenge, taaliyan bajengi,<br>Dance floor pe masti ki mehfil sajegi!<br>Dinner, dancing aur masti beshumaar,<br>Get ready for a night that's truly shaandaar!</p>
+        <div class="attire"><span>Dress code</span>Details to follow…</div>
+        <a class="cal" href="#" data-ics="Rhythm &amp; Revelry – Sangeet|20270524T190000|20270525T000000|Sangeet night for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
 
@@ -420,9 +421,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="orn"></div>
         <div class="time">4:00 – 7:00 pm</div>
         <div class="venue">Venue to follow</div>
-        <p>The baraat and the Hindu wedding ceremony, overlooking the ocean at golden hour.</p>
-        <div class="attire"><span>Dress code</span>Traditional Indian or formal. Sarees, lehengas, sherwanis, suits. Pastels and brights encouraged; please leave red for the bride.</div>
-        <a class="cal" href="#" data-ics="Vows in Paradise – Wedding Ceremony|20270525T160000|20270525T190000|Wedding ceremony of Ankur &amp; Soumya. Dress: traditional Indian or formal.">Add to calendar</a>
+        <p class="verse">Dhol ki thaap, baraat ka jashn,<br>Naachenge sab, hoga full-on fun!<br>Samundar kinare, sunset ke rang,<br>Saat phere honge apno ke sang!<br>Bali ki shaam hogi yaadgaar,<br>Jab do dil bandhenge shaadi ke bandhan mein is baar!</p>
+        <div class="attire"><span>Dress code</span>Details to follow…</div>
+        <a class="cal" href="#" data-ics="Vows in Paradise – Wedding Ceremony|20270525T160000|20270525T190000|Wedding ceremony of Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
 
@@ -437,9 +438,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="orn"></div>
         <div class="time">8:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
-        <p>Dinner, toasts and dancing under the lanterns to close out the celebrations.</p>
-        <div class="attire"><span>Dress code</span>Formal, black tie optional. Indian or western formalwear.</div>
-        <a class="cal" href="#" data-ics="Afterglow – Wedding Reception|20270525T200000|20270526T010000|Wedding reception for Ankur &amp; Soumya. Dress: formal.">Add to calendar</a>
+        <p class="verse">Lanterns ki roshni, sitaron bhari raat,<br>Dinner, drinks aur toasts apno ke saath!<br>Dance aur masti ka hoga jashn shaandaar,<br>Yaadein rahengi dil mein, forever beshumaar!</p>
+        <div class="attire"><span>Dress code</span>Details to follow…</div>
+        <a class="cal" href="#" data-ics="Afterglow – Wedding Reception|20270525T200000|20270526T010000|Wedding reception for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
 
@@ -452,13 +453,13 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 <section class="section travel" id="travel">
   <div class="wrap">
     <h2 class="rv">Getting to Bali</h2>
-    <p class="lead rv rv-d1">Most of what you need to know before you book.</p>
+    <p class="lead rv rv-d1">Most of what you need to know before you book your flight.</p>
     <img class="map rv" src="img/gen/bali-map.jpg" alt="Illustrated map of Bali">
     <div class="cols rv rv-d1">
       <div>
         <h3>Flights</h3>
         <p>Fly into Ngurah Rai International Airport, Denpasar (DPS). From the US the easiest routes connect through Singapore, Doha, Tokyo or Hong Kong. From India there are direct flights from Delhi, Mumbai and Bengaluru.</p>
-        <p>Plan to arrive by Sunday afternoon, May 23, for the welcome party that evening, and fly out from Wednesday, May 26.</p>
+        <p>Plan to arrive by Sunday afternoon, May 23, for the welcome party that evening, and fly out on Wednesday, May 26.</p>
       </div>
       <div>
         <h3>Visa &amp; passport</h3>
@@ -469,20 +470,19 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
       <div>
         <h3>Where to stay</h3>
         <p>All events take place at one resort in southern Bali, a short drive from the airport. Hotel details to come soon.</p>
-        <p class="note">Airbnb and villa options are plentiful across southern Bali if you'd rather stay elsewhere; we'll share nearby suggestions along with the hotel details.</p>
       </div>
       <div>
         <h3>Getting around</h3>
-        <p>Grab and Gojek (ride-hailing apps) work well across Bali and are inexpensive. Hotel transfers from the airport can be arranged ahead of time.</p>
-        <p>Cards are accepted at the resort and most restaurants. Carry some Indonesian rupiah for taxis, markets and small shops.</p>
+        <p>Grab and Gojek (ride-hailing apps) work well across Bali and are inexpensive. Hotel transfers from the airport will be provided.</p>
+        <p>Credit cards are widely accepted across Bali. Carry some Indonesian rupiah for taxis, markets and small shops.</p>
       </div>
       <div>
         <h3>Weather</h3>
-        <p>Late May is the start of Bali's dry season: around 30°C / 86°F, sunny, with the occasional short shower. Light fabrics, sunscreen and something for warm evenings.</p>
+        <p>Late May is the start of Bali's dry season: around 30°C / 86°F, sunny, with occasional showers. Please carry appropriate clothing and sunscreen for the warm climate.</p>
       </div>
       <div>
         <h3>Make a holiday of it</h3>
-        <p>Uluwatu Temple at sunset and the Kecak fire dance. A day in Ubud for the rice terraces and Tirta Empul. Beach clubs in Seminyak and Uluwatu. A boat to Nusa Penida to snorkel with manta rays.</p>
+        <p>Catch a magical sunset and Kecak fire dance at Uluwatu Temple, or explore Ubud's lush rice terraces and sacred Tirta Empul. Sip cocktails at the chic beach clubs of Seminyak and Uluwatu, or sail to Nusa Penida for an unforgettable manta ray snorkeling experience.</p>
       </div>
     </div>
   </div>
@@ -515,20 +515,16 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
   <div class="wrap">
     <h2 class="rv">Questions</h2>
     <div class="faq rv">
-      <details><summary>How do I RSVP?</summary><p>Use the RSVP button on this page. It opens our RSVP form, where you can find your name, tell us whether you're coming, and let us know your meal preference, any dietary needs and your travel dates. One response covers all four days.</p></details>
-      <details><summary>What should I wear?</summary><p>Each event has its own dress code in the schedule above. In general, think light fabrics and colour. It will be warm and humid.</p></details>
-      <details><summary>Can I bring a plus one?</summary><p>Your invitation will say who is included. If you're unsure, message Ankur or Soumya directly.</p></details>
-      <details><summary>Are children welcome?</summary><p>Of course. Bring the whole family. Let us know how many little ones when you RSVP so we can plan food and seating.</p></details>
-      <details><summary>Will there be vegetarian food?</summary><p>Yes. Every event will have vegetarian options, and you can tell us about dietary needs when you RSVP.</p></details>
+      <details><summary>How do I RSVP?</summary><p>Simply click the RSVP button on this page, find your name, and let us know if you'll be joining the celebrations! One RSVP covers all wedding festivities. We can't wait to celebrate with you! 💕</p></details>
+      <details><summary>What should I wear?</summary><p>Each celebration has its own dress code, so check the event details for inspiration! Think breezy fabrics, vibrant colors, and outfits that blend elegance with tropical comfort. After all, it's a Big Fat Indian Wedding in beautiful Bali, so dress to impress, but keep it cool! 🌴☀️</p></details>
       <details><summary>Do I need to exchange money?</summary><p>Cards are widely accepted. Carry some Indonesian rupiah for taxis, markets and small shops. ATMs are everywhere, including the airport.</p></details>
-      <details><summary>Gifts?</summary><p>Your presence in Bali is the greatest gift.</p></details>
     </div>
   </div>
 </section>
 
 <section class="rsvp-band" id="rsvp">
   <h2 class="rv">Will you join us?</h2>
-  <p class="rv rv-d1">Please let us know by <strong>December 15, 2026</strong> so we can plan rooms, flights and plates for everyone.</p>
+  <p class="rv rv-d1">Kindly RSVP by <strong>December 15, 2026</strong>, and let us know if you'll be joining us for the celebrations in Bali! We can't wait to make unforgettable memories together! 🌴💕</p>
   <a class="cta rv rv-d2" href="https://www.theknot.com/ankursoumya/rsvp" target="_blank" rel="noopener">RSVP now</a>
   <small>One response covers all four days.</small>
 </section>
