@@ -5,15 +5,18 @@
  *   GET  ?action=lookup&name=First Last&code=123456  -> finds the guest's row (name + passcode)
  *   POST {action:"submit", row, token, attending, plusOne, message} -> writes the response
  *
- * Script properties (Project Settings > Script properties):
- *   SHEET_NAME     which tab is live. "TEST RSVP Tracker" while testing, "RSVP Tracker" to go live.
- *   NOTIFY_TO      where the couple's "new RSVP" emails go (comma separated).
- *   REPLY_TO       reply-to address on guest confirmations (e.g. rsvp@ankursoumya.com).
+ * Runs as a standalone Apps Script web app that opens the RSVP sheet by ID.
+ * Day-to-day settings live in the sheet's "Website Settings" tab (live tab, alert emails, reply-to, open/closed).
+ *
+ * Script properties (Project Settings > Script properties), technical only:
  *   FROM_NAME      sender name, default "Ankur & Soumya".
  *   BREVO_API_KEY  optional. When set, emails are sent through Brevo from FROM_EMAIL.
  *   FROM_EMAIL     sender address for Brevo, default rsvp@ankursoumya.com.
- *   SECRET         created automatically; signs the row tokens.
+ *   SECRET         created automatically; signs the row tokens and passcodes.
  */
+
+var SHEET_ID = '1dhXm5g0u0N9XoH1SrlfSVOe9u_Qx7x8aUYbk92F5Go0';
+var SETTINGS_TAB = 'Website Settings';
 
 var HEADER_ROW = 3;
 var DEADLINE = new Date('2026-12-16T00:00:00+08:00'); // responses accepted through Dec 15
@@ -73,7 +76,7 @@ function lookup_(name, code) {
   });
   if (hit < 0) { cache.put(key, String(tries + 1), 3600); return { ok: false, error: 'no_match' }; }
   cache.remove(key);
-  return { ok: true, party: party_(t, hit), closed: new Date() >= DEADLINE };
+  return { ok: true, party: party_(t, hit), closed: isClosed_() };
 }
 
 /** 6-digit passcode derived from the guest's phone number (stable), unique within the tab. */
@@ -93,7 +96,7 @@ function makeCode_(phone, salt, used) {
 
 /** Fills the Passcode column for every guest that doesn't have one yet. */
 function fillPasscodes_(sheetName) {
-  var sh = SpreadsheetApp.getActive().getSheetByName(sheetName);
+  var sh = ss_().getSheetByName(sheetName);
   if (!sh) return 0;
   var width = sh.getLastColumn(), last = sh.getLastRow();
   var head = sh.getRange(HEADER_ROW, 1, 1, width).getValues()[0].map(function (h) { return String(h).trim(); });
@@ -134,7 +137,7 @@ function party_(t, i) {
 /* ---------- submit ---------- */
 
 function submit_(b) {
-  if (new Date() >= DEADLINE) return { ok: false, error: 'closed' };
+  if (isClosed_()) return { ok: false, error: 'closed' };
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -200,7 +203,7 @@ function sendGuest_(p) {
 }
 
 function notifyCouple_(p, when) {
-  var to = prop_('NOTIFY_TO', '');
+  var to = setting_('Send new-RSVP alerts to', '');
   if (!to) return;
   var who = p.first + ' ' + p.last;
   var subject = (p.updated ? 'RSVP updated: ' : 'New RSVP: ') + who + ' (' + p.status + (p.p1 ? ', +1 ' + (p.p1status === 'Attending' ? 'yes' : 'no') : '') + ')';
@@ -209,7 +212,7 @@ function notifyCouple_(p, when) {
     '<table style="width:100%;border-collapse:collapse;margin:0 0 14px">' + row_(who, p.status) + (p.p1 ? row_(p.p1 + ' (plus one)', p.p1status) : '') + '</table>' +
     (p.message ? '<p style="margin:0 0 14px;font-style:italic">"' + esc_(p.message) + '"</p>' : '') +
     '<p style="margin:0">Live count: ' + esc_(countLine_()) + '</p>' +
-    '<p style="margin:12px 0 0"><a href="' + SpreadsheetApp.getActive().getUrl() + '" style="color:#5A1A1E">Open the RSVP sheet</a></p>');
+    '<p style="margin:12px 0 0"><a href="' + ss_().getUrl() + '" style="color:#5A1A1E">Open the RSVP sheet</a></p>');
   send_(to, subject, html, plain_(html));
 }
 
@@ -230,7 +233,7 @@ function countLine_() {
 
 function send_(to, subject, html, text) {
   var name = prop_('FROM_NAME', 'Ankur & Soumya');
-  var replyTo = prop_('REPLY_TO', '');
+  var replyTo = setting_('Guest replies go to', '');
   var brevo = prop_('BREVO_API_KEY', '');
   if (brevo) {
     var payload = { sender: { name: name, email: prop_('FROM_EMAIL', 'rsvp@ankursoumya.com') },
@@ -264,10 +267,25 @@ function row_(who, status) {
 
 /* ---------- sheet helpers ---------- */
 
-function sheetName_() { return prop_('SHEET_NAME', 'TEST RSVP Tracker'); }
+function ss_() { return SpreadsheetApp.openById(SHEET_ID); }
+
+var SETTINGS_CACHE = null;
+function settings_() {
+  if (SETTINGS_CACHE) return SETTINGS_CACHE;
+  var out = {}, sh = ss_().getSheetByName(SETTINGS_TAB);
+  if (sh) sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), 2).getDisplayValues().forEach(function (r) { if (r[0]) out[String(r[0]).trim()] = String(r[1]).trim(); });
+  return (SETTINGS_CACHE = out);
+}
+function setting_(k, d) { var v = settings_()[k]; return v ? v : d; }
+function setSetting_(k, v) {
+  var sh = ss_().getSheetByName(SETTINGS_TAB), vals = sh.getRange(1, 1, sh.getLastRow(), 1).getValues();
+  for (var i = 0; i < vals.length; i++) if (String(vals[i][0]).trim() === k) { sh.getRange(i + 1, 2).setValue(v); SETTINGS_CACHE = null; return; }
+}
+function isClosed_() { return new Date() >= DEADLINE || /^no$/i.test(setting_('RSVPs open', 'Yes')); }
+function sheetName_() { return setting_('Live tab', 'TEST RSVP Tracker'); }
 
 function table_() {
-  var sh = SpreadsheetApp.getActive().getSheetByName(sheetName_());
+  var sh = ss_().getSheetByName(sheetName_());
   if (!sh) throw new Error('Tab not found: ' + sheetName_());
   var last = Math.max(sh.getLastRow(), HEADER_ROW);
   var width = sh.getLastColumn();
@@ -318,19 +336,26 @@ function onOpen() {
     .addToUi();
 }
 function menuWhich() { SpreadsheetApp.getUi().alert('The website is reading and writing: "' + sheetName_() + '"\n\n' + countLine_()); }
-function menuTest() { PropertiesService.getScriptProperties().setProperty('SHEET_NAME', 'TEST RSVP Tracker'); menuWhich(); }
+function menuTest() { setSetting_('Live tab', 'TEST RSVP Tracker'); menuWhich(); }
 function menuCodes() {
   var n = fillPasscodes_(sheetName_());
   SpreadsheetApp.getUi().alert(n ? 'Created ' + n + ' new passcode(s) on "' + sheetName_() + '".' : 'Every guest on "' + sheetName_() + '" already has a passcode.');
 }
-function menuLive() { PropertiesService.getScriptProperties().setProperty('SHEET_NAME', 'RSVP Tracker'); menuWhich(); }
+function menuLive() { setSetting_('Live tab', 'RSVP Tracker'); menuWhich(); }
 
-/** Run once from the editor to grant permissions and set defaults. */
+/** Runs every hour: gives any new guest on either tab a passcode. */
+function autoPasscodes() {
+  fillPasscodes_('TEST RSVP Tracker');
+  fillPasscodes_('RSVP Tracker');
+}
+
+/** Run once from the editor to grant permissions, create passcodes and install the hourly passcode job. */
 function setup() {
   var p = PropertiesService.getScriptProperties();
-  if (!p.getProperty('SHEET_NAME')) p.setProperty('SHEET_NAME', 'TEST RSVP Tracker');
   if (!p.getProperty('FROM_NAME')) p.setProperty('FROM_NAME', 'Ankur & Soumya');
   sign_(4, 'a', 'b');
-  Logger.log('Passcodes created: ' + fillPasscodes_('TEST RSVP Tracker'));
+  var hasTrigger = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'autoPasscodes'; });
+  if (!hasTrigger) ScriptApp.newTrigger('autoPasscodes').timeBased().everyHours(1).create();
+  autoPasscodes();
   Logger.log('Live tab: ' + sheetName_() + ' | ' + countLine_() + ' | mail quota left: ' + MailApp.getRemainingDailyQuota());
 }
