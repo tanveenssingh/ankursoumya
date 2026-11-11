@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RSVP · Ankur &amp; Soumya</title>
+<meta name="description" content="RSVP for Ankur and Soumya's wedding in Bali, May 23 to 26, 2027.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../img/monogram.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Tangerine:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#F4EBD6; --card:#FBF6EA; --line:#E2CFA0; --ink:#5A1A1E; --ink-soft:#7A3A3E;
+  --gold:#C7A24A; --gold-deep:#9C7A2A; --teal-deep:#153940; --yes:#2F6B3F; --no:#8A3A3A;
+  --serif:"Cormorant Garamond", Georgia, serif; --caps:"Cinzel", "Cormorant Garamond", serif; --script:"Tangerine", "Cormorant Garamond", cursive;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+html{background:var(--parchment)}
+body{background:var(--parchment);color:var(--ink);font-family:var(--serif);font-size:1.2rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:url("../img/gen/parchment.jpg") center/600px repeat;opacity:.35;mix-blend-mode:multiply}
+a{color:var(--ink)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.top{position:relative;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(16px,4vw,40px);border-bottom:1px solid rgba(199,162,74,.45)}
+.top .back{font-family:var(--serif);font-size:1rem;letter-spacing:0}
+.top a{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--caps);font-size:.78rem;letter-spacing:.2em}
+.top img{width:34px;height:34px}
+main{position:relative;max-width:560px;margin:0 auto;padding:clamp(32px,7vw,64px) 16px 80px}
+.garland{display:block;width:100%;max-width:520px;margin:0 auto -6px;opacity:.95}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:clamp(24px,6vw,40px);box-shadow:0 18px 50px rgba(90,26,30,.12)}
+h1{font-family:var(--script);font-weight:700;font-size:clamp(3.4rem,13vw,4.6rem);line-height:1;text-align:center;margin:0}
+.date{font-family:var(--caps);font-size:.72rem;letter-spacing:.32em;color:var(--gold-deep);text-align:center;margin:8px 0 26px}
+.lead{text-align:center;font-style:italic;margin:0 0 22px}
+label{display:block;font-family:var(--caps);font-size:.7rem;letter-spacing:.22em;margin:0 0 8px}
+input[type=text],textarea{width:100%;font:inherit;font-size:1.15rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+textarea{min-height:96px;resize:vertical;font-size:1.05rem}
+input:focus,textarea:focus{outline:none;border-color:var(--gold-deep);box-shadow:0 0 0 3px rgba(199,162,74,.25)}
+.btn{display:block;width:100%;margin-top:18px;font-family:var(--caps);font-size:.8rem;letter-spacing:.24em;background:var(--ink);color:#fff;border:0;border-radius:3px;padding:16px 20px;cursor:pointer}
+.btn:hover{background:var(--teal-deep)}
+.btn[disabled]{opacity:.55;cursor:wait}
+.link{display:inline;background:none;border:0;padding:0;font:inherit;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.err{color:var(--no);font-style:italic;margin:12px 0 0;min-height:1.5em;text-align:center}
+.who{border-top:1px solid var(--line);padding:18px 0}
+.who:last-of-type{border-bottom:1px solid var(--line);margin-bottom:22px}
+.who .name{font-size:1.35rem;font-weight:600;margin:0 0 10px}
+.who .name small{display:block;font-family:var(--caps);font-size:.62rem;letter-spacing:.24em;font-weight:400;color:var(--gold-deep);margin-top:2px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice label{font-family:var(--serif);font-size:1rem;letter-spacing:0;margin:0}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice span{display:block;text-align:center;border:1px solid var(--line);border-radius:4px;padding:12px 8px;cursor:pointer;background:#fff;font-size:1.05rem;transition:background .2s,border-color .2s,color .2s}
+.choice input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+.choice input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
+.prev{background:rgba(199,162,74,.14);border-radius:4px;padding:10px 14px;font-size:1rem;margin:0 0 18px;text-align:center}
+.summary{list-style:none;padding:0;margin:0 0 20px}
+.summary li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:10px 0}
+.summary .s-yes{color:var(--yes)}.summary .s-no{color:var(--no)}
+.center{text-align:center}
+.fine{font-size:.98rem;color:var(--ink-soft);text-align:center;margin:18px 0 0}
+[hidden]{display:none!important}
+.step{animation:in .5s ease both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.step{animation:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a href="../"><img src="../img/monogram.png" alt="">Ankur &amp; Soumya</a>
+  <a href="../" class="back">← Back to the site</a>
+</header>
+
+<main>
+  <img class="garland" src="../img/gen/garland2.png" alt="" aria-hidden="true">
+  <div class="card">
+    <h1>Kindly RSVP</h1>
+    <div class="date">Bali · May 23 – 26, 2027</div>
+
+    <!-- step 1: find your invitation -->
+    <form class="step" id="sFind" autocomplete="on">
+      <p class="lead">Enter your name as it appears on your invitation.</p>
+      <label for="name">Full name</label>
+      <input type="text" id="name" name="name" autocomplete="name" placeholder="First and last name" required>
+      <div id="phoneWrap" hidden>
+        <p class="lead" style="margin:18px 0 12px">We have more than one guest by that name. Enter the last 4 digits of your phone number so we find the right invitation.</p>
+        <label for="phone">Last 4 digits of your phone</label>
+        <input type="text" id="phone" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="1234">
+      </div>
+      <button class="btn" id="findBtn" type="submit">Find my invitation</button>
+      <p class="err" id="findErr" role="alert"></p>
+    </form>
+
+    <!-- step 2: respond -->
+    <form class="step" id="sReply" hidden>
+      <p class="lead" id="hello"></p>
+      <p class="prev" id="prev" hidden></p>
+      <div class="who" id="guestBlock">
+        <p class="name" id="guestName"></p>
+        <div class="choice" role="radiogroup" aria-labelledby="guestName">
+          <label><input type="radio" name="g" value="yes" required><span>Joyfully accepts</span></label>
+          <label><input type="radio" name="g" value="no"><span>Regretfully declines</span></label>
+        </div>
+      </div>
+      <div class="who" id="p1Block" hidden>
+        <p class="name" id="p1Name"></p>
+        <div class="choice" role="radiogroup" aria-labelledby="p1Name">
+          <label><input type="radio" name="p" value="yes"><span>Joyfully accepts</span></label>
+          <label><input type="radio" name="p" value="no"><span>Regretfully declines</span></label>
+        </div>
+      </div>
+      <label for="msg">A note for Ankur &amp; Soumya (optional)</label>
+      <textarea id="msg" maxlength="1000" placeholder="Wishes, questions, anything you'd like them to know"></textarea>
+      <button class="btn" id="sendBtn" type="submit">Send RSVP</button>
+      <p class="err" id="sendErr" role="alert"></p>
+      <p class="fine"><button type="button" class="link" id="notMe">Not you? Search again</button></p>
+    </form>
+
+    <!-- step 3: done -->
+    <div class="step" id="sDone" hidden>
+      <p class="lead" id="doneLead"></p>
+      <ul class="summary" id="summary"></ul>
+      <p class="center" id="doneMail"></p>
+      <p class="fine">Plans change? Come back here any time before December 15, 2026 to update your response.</p>
+      <a class="btn center" href="../" style="text-decoration:none">Back to the wedding site</a>
+    </div>
+
+    <!-- closed -->
+    <div class="step" id="sClosed" hidden>
+      <p class="lead">RSVPs closed on December 15, 2026. If you need to change your response, please message Ankur or Soumya directly.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+/* The Apps Script web app URL. Set after deploying backend/Code.gs. */
+var API = 'APPS_SCRIPT_URL';
+
+(function(){
+  var $ = function(id){return document.getElementById(id)};
+  var mock = /[?&]mock=1/.test(location.search) || API.indexOf('https://') !== 0;
+  var party = null, lastName = '';
+
+  function show(id){['sFind','sReply','sDone','sClosed'].forEach(function(s){$(s).hidden = s!==id});
+    var f=$(id).querySelector('input,button'); if(f && id!=='sDone') try{f.focus({preventScroll:true})}catch(e){} window.scrollTo(0,0)}
+
+  /* ---- mock backend for local testing (?mock=1) ---- */
+  var MOCK=[{first:'Aarav',last:'Sharma',nick:'Avi',p1:['Meera','Sharma'],ph:'0100',email:'aa•••@example.com'},
+            {first:'Rohan',last:'Mehta',nick:'Ro',p1:null,ph:'1111',email:'ro•••@example.com'},
+            {first:'Rohan',last:'Mehta',nick:'',p1:null,ph:'0110',email:''}];
+  function norm(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+  function mockLookup(n,ph){var q=norm(n); if(q.split(' ').length<2) return {ok:false,error:'need_full_name'};
+    var h=MOCK.map(function(m,i){return i}).filter(function(i){var m=MOCK[i];var ns=[norm(m.first+' '+m.last)];if(m.nick)ns.push(norm(m.nick+' '+m.last));if(m.p1)ns.push(norm(m.p1.join(' ')));return ns.indexOf(q)>-1});
+    if(h.length>1&&ph) h=h.filter(function(i){return MOCK[i].ph===ph});
+    if(!h.length) return {ok:false,error:ph?'no_phone_match':'not_found'}; if(h.length>1) return {ok:false,error:'multiple'};
+    var m=MOCK[h[0]]; return {ok:true,party:{row:h[0]+4,token:'t',first:m.first,last:m.last,plusOne:m.p1?{first:m.p1[0],last:m.p1[1]}:null,status:m.status||'',plusOneStatus:m.p1s||'',message:m.msg||'',respondedAt:m.at||'',emailHint:m.email}}}
+  function mockSubmit(b){var m=MOCK[b.row-4]; m.status=b.attending==='yes'?'Attending':'Not attending'; m.p1s=m.p1?(b.plusOne==='yes'?'Attending':'Not attending'):''; m.msg=b.message; m.at='just now';
+    return {ok:true,status:m.status,plusOneStatus:m.p1s,emailed:!!m.email,emailHint:m.email}}
+
+  function get(params){
+    if(mock) return new Promise(function(r){setTimeout(function(){r(mockLookup(params.name,params.phone))},500)});
+    var u=API+'?action=lookup&name='+encodeURIComponent(params.name)+(params.phone?'&phone='+encodeURIComponent(params.phone):'');
+    return fetch(u).then(function(r){return r.json()});
+  }
+  function post(body){
+    if(mock) return new Promise(function(r){setTimeout(function(){r(mockSubmit(body))},700)});
+    return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()});
+  }
+
+  var MSG={need_full_name:'Please enter your first and last name.',
+    not_found:"We couldn't find that name. Try the name on your invitation, or message Ankur or Soumya and they'll sort it out.",
+    no_phone_match:"Those digits don't match the invitations we have under that name. Please message Ankur or Soumya.",
+    server:'Something went wrong on our side. Please try again in a minute.',
+    stale:'Your invitation details changed while this page was open. Please search for your name again.',
+    closed:'RSVPs have closed.', missing_answer:'Please choose a response for everyone listed.'};
+
+  $('sFind').addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=$('name').value.trim(), phone=$('phoneWrap').hidden?'':$('phone').value.replace(/\D/g,'');
+    if(!$('phoneWrap').hidden && phone.length!==4){$('findErr').textContent='Please enter 4 digits.';return}
+    if(name!==lastName){ $('phoneWrap').hidden=true; phone=''; }
+    lastName=name; $('findErr').textContent=''; $('findBtn').disabled=true; $('findBtn').textContent='Looking…';
+    get({name:name,phone:phone}).then(function(res){
+      if(res.ok){ if(res.closed){show('sClosed');return} party=res.party; fillReply(); show('sReply'); return }
+      if(res.error==='multiple'){ $('phoneWrap').hidden=false; $('phone').focus(); return }
+      $('findErr').textContent=MSG[res.error]||MSG.server;
+    }).catch(function(){ $('findErr').textContent=MSG.server })
+      .then(function(){ $('findBtn').disabled=false; $('findBtn').textContent='Find my invitation' });
+  });
+
+  function setRadio(name,status){var v=status==='Attending'?'yes':status==='Not attending'?'no':'';
+    document.querySelectorAll('input[name='+name+']').forEach(function(i){i.checked=(i.value===v)})}
+
+  function fillReply(){
+    $('hello').textContent='Namaste, '+party.first+'! Will you be joining us in Bali?';
+    $('guestName').textContent=party.first+' '+party.last;
+    var has=!!party.plusOne; $('p1Block').hidden=!has;
+    if(has){ $('p1Name').innerHTML=''; $('p1Name').appendChild(document.createTextNode(party.plusOne.first+' '+party.plusOne.last));
+      var sm=document.createElement('small'); sm.textContent='Your plus one'; $('p1Name').appendChild(sm); }
+    document.querySelectorAll('input[name=p]').forEach(function(i){i.required=has});
+    setRadio('g',party.status); setRadio('p',party.plusOneStatus); $('msg').value=party.message||'';
+    $('prev').hidden=!party.status; if(party.status) $('prev').textContent='You already replied'+(party.respondedAt?' on '+party.respondedAt:'')+'. Change anything below and send again to update it.';
+    $('sendErr').textContent='';
+  }
+
+  $('sReply').addEventListener('submit',function(e){
+    e.preventDefault();
+    var g=document.querySelector('input[name=g]:checked'), p=document.querySelector('input[name=p]:checked');
+    if(!g || (party.plusOne && !p)){ $('sendErr').textContent=MSG.missing_answer; return }
+    $('sendBtn').disabled=true; $('sendBtn').textContent='Sending…'; $('sendErr').textContent='';
+    post({action:'submit',row:party.row,token:party.token,attending:g.value,plusOne:p?p.value:null,message:$('msg').value.trim()})
+      .then(function(res){
+        if(!res.ok){ $('sendErr').textContent=MSG[res.error]||MSG.server; if(res.error==='closed') show('sClosed'); return }
+        done(res);
+      }).catch(function(){ $('sendErr').textContent=MSG.server })
+      .then(function(){ $('sendBtn').disabled=false; $('sendBtn').textContent='Send RSVP' });
+  });
+
+  function li(who,s){var l=document.createElement('li'),a=document.createElement('span'),b=document.createElement('span');
+    a.textContent=who;b.textContent=s;b.className=s==='Attending'?'s-yes':'s-no';l.appendChild(a);l.appendChild(b);return l}
+  function done(res){
+    var yes=res.status==='Attending'||res.plusOneStatus==='Attending';
+    $('doneLead').textContent=yes?'Thank you! We can’t wait to celebrate with you in Bali.':'Thank you for letting us know. You’ll be missed!';
+    var s=$('summary'); s.innerHTML=''; s.appendChild(li(party.first+' '+party.last,res.status));
+    if(party.plusOne) s.appendChild(li(party.plusOne.first+' '+party.plusOne.last,res.plusOneStatus));
+    $('doneMail').textContent=res.emailed?'A confirmation is on its way to '+res.emailHint+'.':'';
+    party.status=res.status; party.plusOneStatus=res.plusOneStatus; party.respondedAt='just now';
+    show('sDone');
+  }
+
+  $('notMe').addEventListener('click',function(){ party=null; $('name').value=''; $('phone').value=''; $('phoneWrap').hidden=true; lastName=''; show('sFind') });
+})();
+</script>
+</body>
+</html>
