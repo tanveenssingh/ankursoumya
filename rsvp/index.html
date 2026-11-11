@@ -78,14 +78,11 @@ input:focus,textarea:focus{outline:none;border-color:var(--gold-deep);box-shadow
 
     <!-- step 1: find your invitation -->
     <form class="step" id="sFind" autocomplete="on">
-      <p class="lead">Enter your name as it appears on your invitation.</p>
+      <p class="lead">Enter your name and the 6-digit passcode Ankur &amp; Soumya sent you.</p>
       <label for="name">Full name</label>
       <input type="text" id="name" name="name" autocomplete="name" placeholder="First and last name" required>
-      <div id="phoneWrap" hidden>
-        <p class="lead" style="margin:18px 0 12px">We have more than one guest by that name. Enter the last 4 digits of your phone number so we find the right invitation.</p>
-        <label for="phone">Last 4 digits of your phone</label>
-        <input type="text" id="phone" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="1234">
-      </div>
+      <label for="code" style="margin-top:16px">Passcode</label>
+      <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digits" required>
       <button class="btn" id="findBtn" type="submit">Find my invitation</button>
       <p class="err" id="findErr" role="alert"></p>
     </form>
@@ -138,27 +135,27 @@ var API = 'APPS_SCRIPT_URL';
 (function(){
   var $ = function(id){return document.getElementById(id)};
   var mock = /[?&]mock=1/.test(location.search) || API.indexOf('https://') !== 0;
-  var party = null, lastName = '';
+  var party = null;
+  var qc=(location.search.match(/[?&]code=(\d{6})/)||[])[1]; if(qc) $('code').value=qc;
 
   function show(id){['sFind','sReply','sDone','sClosed'].forEach(function(s){$(s).hidden = s!==id});
     var f=$(id).querySelector('input,button'); if(f && id!=='sDone') try{f.focus({preventScroll:true})}catch(e){} window.scrollTo(0,0)}
 
   /* ---- mock backend for local testing (?mock=1) ---- */
-  var MOCK=[{first:'Aarav',last:'Sharma',nick:'Avi',p1:['Meera','Sharma'],ph:'0100',email:'aa•••@example.com'},
-            {first:'Rohan',last:'Mehta',nick:'Ro',p1:null,ph:'1111',email:'ro•••@example.com'},
-            {first:'Rohan',last:'Mehta',nick:'',p1:null,ph:'0110',email:''}];
+  var MOCK=[{first:'Aarav',last:'Sharma',nick:'Avi',p1:['Meera','Sharma'],code:'111111',email:'aa•••@example.com'},
+            {first:'Rohan',last:'Mehta',nick:'Ro',p1:null,code:'222222',email:'ro•••@example.com'},
+            {first:'Rohan',last:'Mehta',nick:'',p1:null,code:'333333',email:''}];
   function norm(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
-  function mockLookup(n,ph){var q=norm(n); if(q.split(' ').length<2) return {ok:false,error:'need_full_name'};
-    var h=MOCK.map(function(m,i){return i}).filter(function(i){var m=MOCK[i];var ns=[norm(m.first+' '+m.last)];if(m.nick)ns.push(norm(m.nick+' '+m.last));if(m.p1)ns.push(norm(m.p1.join(' ')));return ns.indexOf(q)>-1});
-    if(h.length>1&&ph) h=h.filter(function(i){return MOCK[i].ph===ph});
-    if(!h.length) return {ok:false,error:ph?'no_phone_match':'not_found'}; if(h.length>1) return {ok:false,error:'multiple'};
+  function mockLookup(n,code){var q=norm(n); if(q.split(' ').length<2) return {ok:false,error:'need_full_name'}; if(code.length!==6) return {ok:false,error:'need_code'};
+    var h=MOCK.map(function(m,i){return i}).filter(function(i){var m=MOCK[i];var ns=[norm(m.first+' '+m.last)];if(m.nick)ns.push(norm(m.nick+' '+m.last));if(m.p1)ns.push(norm(m.p1.join(' ')));return ns.indexOf(q)>-1&&m.code===code});
+    if(!h.length) return {ok:false,error:'no_match'};
     var m=MOCK[h[0]]; return {ok:true,party:{row:h[0]+4,token:'t',first:m.first,last:m.last,plusOne:m.p1?{first:m.p1[0],last:m.p1[1]}:null,status:m.status||'',plusOneStatus:m.p1s||'',message:m.msg||'',respondedAt:m.at||'',emailHint:m.email}}}
   function mockSubmit(b){var m=MOCK[b.row-4]; m.status=b.attending==='yes'?'Attending':'Not attending'; m.p1s=m.p1?(b.plusOne==='yes'?'Attending':'Not attending'):''; m.msg=b.message; m.at='just now';
     return {ok:true,status:m.status,plusOneStatus:m.p1s,emailed:!!m.email,emailHint:m.email}}
 
   function get(params){
-    if(mock) return new Promise(function(r){setTimeout(function(){r(mockLookup(params.name,params.phone))},500)});
-    var u=API+'?action=lookup&name='+encodeURIComponent(params.name)+(params.phone?'&phone='+encodeURIComponent(params.phone):'');
+    if(mock) return new Promise(function(r){setTimeout(function(){r(mockLookup(params.name,params.code))},500)});
+    var u=API+'?action=lookup&name='+encodeURIComponent(params.name)+'&code='+encodeURIComponent(params.code);
     return fetch(u).then(function(r){return r.json()});
   }
   function post(body){
@@ -167,21 +164,19 @@ var API = 'APPS_SCRIPT_URL';
   }
 
   var MSG={need_full_name:'Please enter your first and last name.',
-    not_found:"We couldn't find that name. Try the name on your invitation, or message Ankur or Soumya and they'll sort it out.",
-    no_phone_match:"Those digits don't match the invitations we have under that name. Please message Ankur or Soumya.",
+    need_code:'Please enter the 6-digit passcode from your invitation.',
+    no_match:"That name and passcode don't match our list. Check the name on your invitation and the passcode, or message Ankur or Soumya.",
+    too_many:'Too many tries for that name. Please wait an hour or message Ankur or Soumya.',
     server:'Something went wrong on our side. Please try again in a minute.',
     stale:'Your invitation details changed while this page was open. Please search for your name again.',
     closed:'RSVPs have closed.', missing_answer:'Please choose a response for everyone listed.'};
 
   $('sFind').addEventListener('submit',function(e){
     e.preventDefault();
-    var name=$('name').value.trim(), phone=$('phoneWrap').hidden?'':$('phone').value.replace(/\D/g,'');
-    if(!$('phoneWrap').hidden && phone.length!==4){$('findErr').textContent='Please enter 4 digits.';return}
-    if(name!==lastName){ $('phoneWrap').hidden=true; phone=''; }
-    lastName=name; $('findErr').textContent=''; $('findBtn').disabled=true; $('findBtn').textContent='Looking…';
-    get({name:name,phone:phone}).then(function(res){
+    var name=$('name').value.trim(), code=$('code').value.replace(/\D/g,'');
+    $('findErr').textContent=''; $('findBtn').disabled=true; $('findBtn').textContent='Looking…';
+    get({name:name,code:code}).then(function(res){
       if(res.ok){ if(res.closed){show('sClosed');return} party=res.party; fillReply(); show('sReply'); return }
-      if(res.error==='multiple'){ $('phoneWrap').hidden=false; $('phone').focus(); return }
       $('findErr').textContent=MSG[res.error]||MSG.server;
     }).catch(function(){ $('findErr').textContent=MSG.server })
       .then(function(){ $('findBtn').disabled=false; $('findBtn').textContent='Find my invitation' });
@@ -227,7 +222,7 @@ var API = 'APPS_SCRIPT_URL';
     show('sDone');
   }
 
-  $('notMe').addEventListener('click',function(){ party=null; $('name').value=''; $('phone').value=''; $('phoneWrap').hidden=true; lastName=''; show('sFind') });
+  $('notMe').addEventListener('click',function(){ party=null; $('name').value=''; $('code').value=''; show('sFind') });
 })();
 </script>
 </body>
