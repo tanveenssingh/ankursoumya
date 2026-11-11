@@ -2,7 +2,7 @@
  * Ankur & Soumya — RSVP backend (Google Apps Script, bound to the RSVP Tracker sheet)
  *
  * The website (ankursoumya.com/rsvp) calls this as a web app:
- *   GET  ?action=lookup&name=First Last[&phone=1234]  -> finds the guest's row
+ *   GET  ?action=lookup&name=First Last&code=123456  -> finds the guest's row (name + passcode)
  *   POST {action:"submit", row, token, attending, plusOne, message} -> writes the response
  *
  * Script properties (Project Settings > Script properties):
@@ -23,7 +23,7 @@ var COLS = {
   first: 'First Name', last: 'Last Name', nick: 'Nick Name', email: 'Email', phone: 'WhatsApp Phone Number',
   p1first: 'Plus One First Name', p1last: 'Plus One Last Name',
   status: 'RSVP Status', p1status: 'Plus One RSVP', message: 'Message to Couple',
-  respondedAt: 'Responded At', confirmation: 'Confirmation Sent'
+  respondedAt: 'Responded At', confirmation: 'Confirmation Sent', code: 'Passcode'
 };
 
 /* ---------- web app entry points ---------- */
@@ -31,7 +31,7 @@ var COLS = {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'lookup') return json_(lookup_(p.name || '', p.phone || ''));
+    if (p.action === 'lookup') return json_(lookup_(p.name || '', p.code || ''));
     if (p.action === 'ping') return json_({ ok: true, sheet: sheetName_() });
     return json_({ ok: false, error: 'unknown_action' });
   } catch (err) {
@@ -51,27 +51,65 @@ function doPost(e) {
 
 /* ---------- lookup ---------- */
 
-function lookup_(name, phone) {
+function lookup_(name, code) {
   var q = norm_(name);
+  code = String(code || '').replace(/\D/g, '');
   if (q.split(' ').length < 2) return { ok: false, error: 'need_full_name' };
+  if (code.length !== 6) return { ok: false, error: 'need_code' };
+  var cache = CacheService.getScriptCache(), key = 'tries_' + Utilities.base64EncodeWebSafe(q).slice(0, 200);
+  var tries = Number(cache.get(key) || 0);
+  if (tries >= 10) return { ok: false, error: 'too_many' };
   var t = table_();
-  var hits = [];
+  var hit = -1;
   t.rows.forEach(function (r, i) {
+    if (hit > -1) return;
     var first = norm_(r[t.c.first]), last = norm_(r[t.c.last]), nick = norm_(r[t.c.nick]);
     var p1 = norm_(r[t.c.p1first] + ' ' + r[t.c.p1last]);
     if (!first && !last) return;
     var names = [first + ' ' + last];
     if (nick) names.push(nick + ' ' + last);
     if (p1.trim()) names.push(p1);
-    if (names.indexOf(q) > -1) hits.push(i);
+    if (names.indexOf(q) > -1 && String(r[t.c.code]).replace(/\D/g, '') === code) hit = i;
   });
-  if (hits.length > 1 && phone) {
-    var d = String(phone).replace(/\D/g, '').slice(-4);
-    hits = hits.filter(function (i) { return String(t.rows[i][t.c.phone]).replace(/\D/g, '').slice(-4) === d; });
+  if (hit < 0) { cache.put(key, String(tries + 1), 3600); return { ok: false, error: 'no_match' }; }
+  cache.remove(key);
+  return { ok: true, party: party_(t, hit), closed: new Date() >= DEADLINE };
+}
+
+/** 6-digit passcode derived from the guest's phone number (stable), unique within the tab. */
+function makeCode_(phone, salt, used) {
+  var props = PropertiesService.getScriptProperties();
+  var s = props.getProperty('SECRET');
+  if (!s) { s = Utilities.getUuid(); props.setProperty('SECRET', s); }
+  var base = String(phone || '').replace(/\D/g, '') || ('row' + salt);
+  for (var n = 0; n < 50; n++) {
+    var h = Utilities.computeHmacSha256Signature(base + '|' + n, s);
+    var v = ((h[0] & 255) * 16777216 + (h[1] & 255) * 65536 + (h[2] & 255) * 256 + (h[3] & 255)) % 900000 + 100000;
+    var c = String(v);
+    if (!used[c]) { used[c] = true; return c; }
   }
-  if (hits.length === 0) return { ok: false, error: phone ? 'no_phone_match' : 'not_found' };
-  if (hits.length > 1) return { ok: false, error: 'multiple' };
-  return { ok: true, party: party_(t, hits[0]), closed: new Date() >= DEADLINE };
+  throw new Error('Could not make a unique passcode');
+}
+
+/** Fills the Passcode column for every guest that doesn't have one yet. */
+function fillPasscodes_(sheetName) {
+  var sh = SpreadsheetApp.getActive().getSheetByName(sheetName);
+  if (!sh) return 0;
+  var width = sh.getLastColumn(), last = sh.getLastRow();
+  var head = sh.getRange(HEADER_ROW, 1, 1, width).getValues()[0].map(function (h) { return String(h).trim(); });
+  var ci = head.indexOf(COLS.code), fi = head.indexOf(COLS.first), pi = head.indexOf(COLS.phone);
+  if (ci < 0 || last <= HEADER_ROW) return 0;
+  var vals = sh.getRange(HEADER_ROW + 1, 1, last - HEADER_ROW, width).getDisplayValues();
+  var used = {}, made = 0;
+  vals.forEach(function (r) { if (r[ci]) used[String(r[ci]).replace(/\D/g, '')] = true; });
+  var out = vals.map(function (r, i) {
+    if (r[ci] || !String(r[fi]).trim()) return [r[ci]];
+    made++; return [makeCode_(r[pi], i, used)];
+  });
+  var rng = sh.getRange(HEADER_ROW + 1, ci + 1, out.length, 1);
+  rng.setNumberFormat('@');
+  rng.setValues(out);
+  return made;
 }
 
 function party_(t, i) {
@@ -275,10 +313,16 @@ function onOpen() {
     .addItem('Which tab is live?', 'menuWhich')
     .addItem('Switch website to the TEST tab', 'menuTest')
     .addItem('Switch website to the real RSVP Tracker', 'menuLive')
+    .addSeparator()
+    .addItem('Create passcodes for new guests', 'menuCodes')
     .addToUi();
 }
 function menuWhich() { SpreadsheetApp.getUi().alert('The website is reading and writing: "' + sheetName_() + '"\n\n' + countLine_()); }
 function menuTest() { PropertiesService.getScriptProperties().setProperty('SHEET_NAME', 'TEST RSVP Tracker'); menuWhich(); }
+function menuCodes() {
+  var n = fillPasscodes_(sheetName_());
+  SpreadsheetApp.getUi().alert(n ? 'Created ' + n + ' new passcode(s) on "' + sheetName_() + '".' : 'Every guest on "' + sheetName_() + '" already has a passcode.');
+}
 function menuLive() { PropertiesService.getScriptProperties().setProperty('SHEET_NAME', 'RSVP Tracker'); menuWhich(); }
 
 /** Run once from the editor to grant permissions and set defaults. */
@@ -287,5 +331,6 @@ function setup() {
   if (!p.getProperty('SHEET_NAME')) p.setProperty('SHEET_NAME', 'TEST RSVP Tracker');
   if (!p.getProperty('FROM_NAME')) p.setProperty('FROM_NAME', 'Ankur & Soumya');
   sign_(4, 'a', 'b');
+  Logger.log('Passcodes created: ' + fillPasscodes_('TEST RSVP Tracker'));
   Logger.log('Live tab: ' + sheetName_() + ' | ' + countLine_() + ' | mail quota left: ' + MailApp.getRemainingDailyQuota());
 }
