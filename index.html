@@ -283,6 +283,9 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 .sticky{position:fixed;left:0;right:0;bottom:0;width:100%;box-sizing:border-box;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5);backdrop-filter:blur(8px)}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
+.mute{position:fixed;left:16px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:8px;font-family:var(--caps);font-size:.66rem;letter-spacing:.18em;color:var(--ink);background:rgba(251,246,234,.92);border:1px solid rgba(90,26,30,.25);border-radius:30px;padding:9px 14px 9px 11px;cursor:pointer;box-shadow:0 6px 18px rgba(90,26,30,.15);animation:lockin .5s ease both}
+.mute svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mute[hidden]{display:none}
 /* site password gate */
 .lock{display:none}
 html.locked body>*:not(.lock){display:none!important}
@@ -413,6 +416,7 @@ html.locked .lock{display:grid;position:fixed;inset:0;z-index:100;place-items:ce
         <div class="scap" id="scap">Cover · tap play, swipe or use the arrows · tap a card to enlarge</div>
       </div>
       <button class="skip" id="skip" type="button">Skip the envelope</button>
+      <button class="mute" id="mute" type="button" hidden aria-label="Stop the music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>Stop music</button>
     </div>
   </div>
 </section>
@@ -619,8 +623,15 @@ html.locked .lock{display:grid;position:fixed;inset:0;z-index:100;place-items:ce
     [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===cur)});
     scap.textContent=names[cur]+(cur===0?' · tap play, swipe or use the arrows · tap a card to enlarge':' · '+(cur+1)+' of '+slides.length)}
   // envelope sequence
+  // entry music: plays once each time the envelope is tapped open
+  var music=new Audio('audio/entry.mp3'),mute=document.getElementById('mute');music.preload='auto';
+  function stopMusic(){music.pause();mute.hidden=true}
+  music.addEventListener('ended',function(){mute.hidden=true});
+  mute.addEventListener('click',stopMusic);
   function open(){
-    if(opened)return;opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');
+    if(opened)return;opened=true;
+    document.getElementById('skip').style.display='none';
+    try{music.currentTime=0;var pr=music.play();mute.hidden=false;if(pr&&pr.catch)pr.catch(function(){mute.hidden=true})}catch(e){}env.removeAttribute('role');env.removeAttribute('tabindex');
     if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock();return}
     var drop=env.offsetHeight*.76,y0=window.scrollY,t0=performance.now(),root=document.documentElement,sb=root.style.scrollBehavior;
     root.style.scrollBehavior='auto';env.style.transition='none';
