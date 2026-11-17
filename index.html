@@ -98,7 +98,14 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 .event .attire p{margin:0}.event .attire .pal{opacity:.92;font-style:italic}
 .event .attire .dc{margin-top:8px;font-weight:600}
 .event .attire .avoid{margin-top:6px;font-family:var(--caps);font-size:.68rem;letter-spacing:.2em;opacity:.9}
-.event .attire span{font-family:var(--caps);font-size:.68rem;letter-spacing:.28em;display:block;margin-bottom:5px;opacity:.9}
+.event .attire summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:12px;font-family:var(--caps);font-size:.72rem;letter-spacing:.28em;padding:6px 0;-webkit-tap-highlight-color:transparent}
+.event .attire summary::-webkit-details-marker{display:none}
+.event .attire summary i{position:relative;width:26px;height:26px;border:1px solid currentColor;border-radius:50%;opacity:.9;transition:transform .35s}
+.event .attire summary i::before,.event .attire summary i::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:1.5px;background:currentColor;transform:translate(-50%,-50%)}
+.event .attire summary i::after{transform:translate(-50%,-50%) rotate(90deg)}
+.event .attire[open] summary i{transform:rotate(45deg)}
+.event .attire .dbody{padding-top:8px;animation:dfade .4s ease}
+@keyframes dfade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .event .cal{display:inline-block;margin-top:22px;font-family:var(--caps);font-size:.68rem;letter-spacing:.24em;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.7);padding:10px 18px;border-radius:2px}
 .event .cal:hover{background:rgba(255,255,255,.15)}
 /* text on the left: darken left; text on the right: darken right */
@@ -392,7 +399,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="time">6:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
         <p class="verse">Sunset ka magic, samundar ka nazara,<br>Live music aur cocktails ka sahara.<br>Good vibes, great food aur pyaar beshumaar,<br>Let's kick off the wedding celebrations with a shaandaar shaam!</p>
-        <div class="attire"><span>Dress code</span><em class="theme">Sands &amp; Champagne</em><p class="pal">Tropical whites, ivory, sand, beige and champagne. Effortlessly chic island elegance.</p><p class="dc">Semi Formal Tropical Whites &amp; Neutrals (Indian, Western or Indo-Western)</p></div>
+        <details class="attire"><summary>Dress code<i aria-hidden="true"></i></summary><div class="dbody"><em class="theme">Sands &amp; Champagne</em><p class="pal">Tropical whites, ivory, sand, beige and champagne. Effortlessly chic island elegance.</p><p class="dc">Semi Formal Tropical Whites &amp; Neutrals (Indian, Western or Indo-Western)</p></div></details>
         <a class="cal" href="#" data-ics="Island Mehfil – Welcome Party|20270523T180000|20270523T230000|Welcome party for Ankur &amp; Soumya's wedding. ">Add to calendar</a>
       </div></div>
     </article>
@@ -409,7 +416,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="time">10:00 am onwards</div>
         <div class="venue">Venue to follow</div>
         <p class="verse">Haldi ka rang, apno ka pyaar,<br>Masti aur laughter ki hogi bahaar!<br>Dulha dulhan pe chadhega golden glow,<br>Blessings aur good vibes ka hoga flow!<br>Thodi si haldi, thoda sa hungama,<br>Brunch ke saath chalega khushiyon ka drama!</p>
-        <div class="attire"><span>Dress code</span><em class="theme">Sunshine &amp; Saffron</em><p class="pal">From buttery yellow to golden mustard and rich marigold. A celebration drenched in sunshine.</p><p class="dc">All Shades of Yellow (Indian, Western or Indo-Western)</p></div>
+        <details class="attire"><summary>Dress code<i aria-hidden="true"></i></summary><div class="dbody"><em class="theme">Sunshine &amp; Saffron</em><p class="pal">From buttery yellow to golden mustard and rich marigold. A celebration drenched in sunshine.</p><p class="dc">All Shades of Yellow (Indian, Western or Indo-Western)</p></div></details>
         <a class="cal" href="#" data-ics="Turmeric &amp; Tropics – Haldi|20270524T100000|20270524T130000|Haldi ceremony for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
@@ -426,7 +433,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="time">7:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
         <p class="verse">Music ki beats, sitaron bhari raat,<br>Friends and families honge ek saath!<br>Thumke lagenge, taaliyan bajengi,<br>Dance floor pe masti ki mehfil sajegi!<br>Dinner, dancing aur masti beshumaar,<br>Get ready for a night that's truly shaandaar!</p>
-        <div class="attire"><span>Dress code</span><em class="theme">Bollywood (Baliwood) After Dark</em><p class="pal">Vibrant fuchsia, royal blue, plum and shimmering gold. A night made for dancing.</p><p class="dc">Vibrant Indian Festive Glam</p><p class="avoid">Please avoid green</p></div>
+        <details class="attire"><summary>Dress code<i aria-hidden="true"></i></summary><div class="dbody"><em class="theme">Bollywood (Baliwood) After Dark</em><p class="pal">Vibrant fuchsia, royal blue, plum and shimmering gold. A night made for dancing.</p><p class="dc">Vibrant Indian Festive Glam</p><p class="avoid">Please avoid green</p></div></details>
         <a class="cal" href="#" data-ics="Rhythm &amp; Revelry – Sangeet|20270524T190000|20270525T000000|Sangeet night for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
@@ -443,7 +450,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="time">4:00 – 7:00 pm</div>
         <div class="venue">Venue to follow</div>
         <p class="verse">Dhol ki thaap, baraat ka jashn,<br>Naachenge sab, hoga full-on fun!<br>Samundar kinare, sunset ke rang,<br>Saat phere honge apno ke sang!</p>
-        <div class="attire"><span>Dress code</span><em class="theme">Pastel Reverie</em><p class="pal">Dreamy blush pink, powder blue, sage, lavender and soft peach. Romantic and timeless.</p><p class="dc">Pastel Indian Elegance</p><p class="avoid">Please avoid red &amp; gold</p></div>
+        <details class="attire"><summary>Dress code<i aria-hidden="true"></i></summary><div class="dbody"><em class="theme">Pastel Reverie</em><p class="pal">Dreamy blush pink, powder blue, sage, lavender and soft peach. Romantic and timeless.</p><p class="dc">Pastel Indian Elegance</p><p class="avoid">Please avoid red &amp; gold</p></div></details>
         <a class="cal" href="#" data-ics="Vows in Paradise – Wedding Ceremony|20270525T160000|20270525T190000|Wedding ceremony of Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
@@ -460,7 +467,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
         <div class="time">8:00 pm onwards</div>
         <div class="venue">Venue to follow</div>
         <p class="verse">Lanterns ki roshni, sitaron bhari raat,<br>Dinner, drinks aur toasts apno ke saath!<br>Dance aur masti ka hoga jashn shaandaar,<br>Yaadein rahengi dil mein, forever beshumaar!</p>
-        <div class="attire"><span>Dress code</span><em class="theme">Midnight &amp; Jewels</em><p class="pal">Black-tie sophistication with emerald, sapphire, ruby, amethyst and rich black.</p><p class="dc">Black Tie &amp; Jewel-Toned Gowns</p><p class="avoid">Please avoid white &amp; ivory</p></div>
+        <details class="attire"><summary>Dress code<i aria-hidden="true"></i></summary><div class="dbody"><em class="theme">Midnight &amp; Jewels</em><p class="pal">Black-tie sophistication with emerald, sapphire, ruby, amethyst and rich black.</p><p class="dc">Black Tie &amp; Jewel-Toned Gowns</p><p class="avoid">Please avoid white &amp; ivory</p></div></details>
         <a class="cal" href="#" data-ics="Afterglow – Wedding Reception|20270525T200000|20270526T010000|Wedding reception for Ankur &amp; Soumya. ">Add to calendar</a>
       </div></div>
     </article>
