@@ -23,9 +23,8 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
-html,body{overflow-x:hidden}
-body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--serif);font-size:1.2rem;line-height:1.55;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;background:url("img/gen/parchment.jpg") center/600px repeat;opacity:.35;mix-blend-mode:multiply;z-index:0}
+html{overflow-x:hidden}body{overflow-x:clip}
+body{margin:0;background:var(--parchment) url("img/gen/parchment-bg.jpg") 0 0/600px repeat;color:var(--ink);font-family:var(--serif);font-size:1.2rem;line-height:1.55;-webkit-font-smoothing:antialiased}
 body>*{position:relative;z-index:1}
 img{max-width:100%;display:block}
 a{color:var(--teal)}
@@ -35,7 +34,7 @@ h1,h2,h3{font-weight:500;line-height:1.1;margin:0}
 :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:50;background:rgba(244,235,214,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(199,162,74,.45)}
+.nav{position:sticky;top:0;z-index:50;background:rgba(244,235,214,.97);border-bottom:1px solid rgba(199,162,74,.45)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
 .nav .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--caps);font-size:.8rem;letter-spacing:.2em}
 .nav .brand img{width:34px;height:34px}
@@ -280,7 +279,7 @@ footer{text-align:center;padding:40px var(--gutter) 90px;font-size:1rem;color:va
 footer img{width:60px;margin:0 auto 12px;opacity:.9}
 
 /* mobile sticky rsvp */
-.sticky{position:fixed;left:0;right:0;bottom:0;width:100%;box-sizing:border-box;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5);backdrop-filter:blur(8px)}
+.sticky{position:fixed;left:0;right:0;bottom:0;width:100%;box-sizing:border-box;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5)}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
 .mute{position:fixed;left:16px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:8px;font-family:var(--caps);font-size:.66rem;letter-spacing:.18em;color:var(--ink);background:rgba(251,246,234,.92);border:1px solid rgba(90,26,30,.25);border-radius:30px;padding:9px 14px 9px 11px;cursor:pointer;box-shadow:0 6px 18px rgba(90,26,30,.15);animation:lockin .5s ease both}
