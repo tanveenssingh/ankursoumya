@@ -283,10 +283,47 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 .sticky{position:fixed;left:0;right:0;bottom:0;width:100%;box-sizing:border-box;z-index:60;padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));background:rgba(244,235,214,.95);border-top:1px solid rgba(199,162,74,.5);backdrop-filter:blur(8px)}
 .sticky a{display:block;text-align:center;font-family:var(--caps);font-size:.8rem;letter-spacing:.22em;background:var(--ink);color:#fff;text-decoration:none;padding:14px;border-radius:2px}
 @media (min-width:860px){.sticky{display:none}}
+/* site password gate */
+.lock{display:none}
+html.locked body>*:not(.lock){display:none!important}
+html.locked body{overflow:hidden}
+html.locked .lock{display:grid;position:fixed;inset:0;z-index:100;place-items:center;padding:24px;background:var(--teal-deep) url("img/gen/hero.jpg") 60% center/cover no-repeat;color:#fff;text-align:center}
+.lock::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,20,25,.35),rgba(10,20,25,.55))}
+.lock form{position:relative;width:min(100%,340px);animation:lockin 1.2s ease both}
+.lock img{width:min(52vw,230px);display:block;margin:0 auto 34px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.45))}
+.lock label{display:block;font-family:var(--caps);font-size:.72rem;letter-spacing:.3em;margin:0 0 12px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.lock .row{display:flex;gap:8px}
+.lock input{flex:1;min-width:0;font:inherit;font-size:1.3rem;letter-spacing:.4em;text-align:center;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.65);border-radius:3px;padding:12px 10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lock input::placeholder{color:rgba(255,255,255,.6);letter-spacing:.2em}
+.lock input:focus{outline:none;border-color:#E9B949;box-shadow:0 0 0 3px rgba(233,185,73,.35)}
+.lock button{font-family:var(--caps);font-size:.78rem;letter-spacing:.22em;background:#E9B949;color:#3a1416;border:0;border-radius:3px;padding:0 18px;cursor:pointer}
+.lock .msg{min-height:1.5em;margin:12px 0 0;font-style:italic;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.lock.shake form{animation:shake .4s}
+@keyframes lockin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
 </style>
-<script>document.documentElement.classList.add("gated")</script>
+<script>document.documentElement.classList.add("gated");try{if(localStorage.getItem("as_ok")!=="49a92e0d")document.documentElement.classList.add("locked")}catch(e){document.documentElement.classList.add("locked")}</script>
 </head>
 <body>
+<div class="lock" id="lock">
+  <form id="lockForm" autocomplete="off">
+    <img src="img/monogram-pearl.png" alt="Ankur and Soumya monogram">
+    <label for="lockPw">Enter password</label>
+    <div class="row"><input id="lockPw" type="password" inputmode="numeric" maxlength="12" placeholder="••••" aria-describedby="lockMsg" autofocus><button type="submit">Enter</button></div>
+    <p class="msg" id="lockMsg" role="alert"></p>
+  </form>
+</div>
+<script>
+(function(){var H="49a92e0d534a6b99d17315853825512504b1e7715fef41ceb18605db20f16a47",f=document.getElementById('lockForm'),i=document.getElementById('lockPw'),m=document.getElementById('lockMsg'),L=document.getElementById('lock');
+  function hex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
+  function check(v){if(window.crypto&&crypto.subtle)return crypto.subtle.digest('SHA-256',new TextEncoder().encode('as-bali|'+v)).then(function(b){return hex(b)===H});return Promise.resolve(false)}
+  f.addEventListener('submit',function(e){e.preventDefault();var v=i.value.trim();
+    check(v).then(function(ok){
+      if(!ok){m.textContent="That password isn't right. Please check your invitation.";L.classList.remove('shake');void L.offsetWidth;L.classList.add('shake');i.select();return}
+      try{localStorage.setItem('as_pw',v);localStorage.setItem('as_ok',H.slice(0,8))}catch(x){}
+      if(/[?&]next=rsvp/.test(location.search)){location.href='rsvp/';return}
+      document.documentElement.classList.remove('locked');window.scrollTo(0,0)})})})();
+</script>
 
 <nav class="nav" aria-label="Site">
   <div class="wrap">
@@ -543,7 +580,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
   <div class="wrap">
     <h2 class="rv">Questions</h2>
     <div class="faq rv">
-      <details><summary>How do I RSVP?</summary><p>Simply click the RSVP button on this page, enter your name and the passcode from your invitation, and let us know if you'll be joining the celebrations! One RSVP covers all wedding festivities. We can't wait to celebrate with you! 💕</p></details>
+      <details><summary>How do I RSVP?</summary><p>Simply click the RSVP button on this page, enter your full name, and let us know if you'll be joining the celebrations! One RSVP covers all wedding festivities. We can't wait to celebrate with you! 💕</p></details>
       <details><summary>What should I wear?</summary><p>Each celebration has its own dress code, so check the event details for inspiration! Think breezy fabrics, vibrant colors, and outfits that blend elegance with tropical comfort. Dress to impress, but keep it cool! 🌴☀️</p></details>
       <details><summary>Do I need to exchange money?</summary><p>Cards are widely accepted. Carry some Indonesian rupiah for taxis, markets and small shops. ATMs are everywhere, including the airport.</p></details>
     </div>

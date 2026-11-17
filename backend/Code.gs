@@ -2,17 +2,18 @@
  * Ankur & Soumya — RSVP backend (Google Apps Script, bound to the RSVP Tracker sheet)
  *
  * The website (ankursoumya.com/rsvp) calls this as a web app:
- *   GET  ?action=lookup&name=First Last&code=123456  -> finds the guest's row (name + passcode)
+ *   GET  ?action=unlock&pw=0525                    -> checks the website password
+ *   GET  ?action=lookup&name=First Last&pw=0525    -> finds the guest's row by full name (guest or plus one)
  *   POST {action:"submit", row, token, attending, plusOne, message} -> writes the response
  *
  * Runs as a standalone Apps Script web app that opens the RSVP sheet by ID.
- * Day-to-day settings live in the sheet's "Website Settings" tab (live tab, alert emails, reply-to, open/closed).
+ * Day-to-day settings live in the sheet's "Website Settings" tab (live tab, website password, alert emails, reply-to, open/closed).
  *
  * Script properties (Project Settings > Script properties), technical only:
  *   FROM_NAME      sender name, default "Ankur & Soumya".
  *   BREVO_API_KEY  optional. When set, emails are sent through Brevo from FROM_EMAIL.
  *   FROM_EMAIL     sender address for Brevo, default rsvp@ankursoumya.com.
- *   SECRET         created automatically; signs the row tokens and passcodes.
+ *   SECRET         created automatically; signs the row tokens.
  */
 
 var SHEET_ID = '1dhXm5g0u0N9XoH1SrlfSVOe9u_Qx7x8aUYbk92F5Go0';
@@ -26,7 +27,7 @@ var COLS = {
   first: 'First Name', last: 'Last Name', nick: 'Nick Name', email: 'Email', phone: 'WhatsApp Phone Number',
   p1first: 'Plus One First Name', p1last: 'Plus One Last Name',
   status: 'RSVP Status', p1status: 'Plus One RSVP', message: 'Message to Couple',
-  respondedAt: 'Responded At', confirmation: 'Confirmation Sent', code: 'Passcode'
+  respondedAt: 'Responded At', confirmation: 'Confirmation Sent'
 };
 
 /* ---------- web app entry points ---------- */
@@ -34,7 +35,8 @@ var COLS = {
 function doGet(e) {
   var p = (e && e.parameter) || {};
   try {
-    if (p.action === 'lookup') return json_(lookup_(p.name || '', p.code || ''));
+    if (p.action === 'unlock') return json_({ ok: pwOk_(p.pw), closed: isClosed_() });
+    if (p.action === 'lookup') return json_(lookup_(p.name || '', p.pw || ''));
     if (p.action === 'ping') return json_({ ok: true, sheet: sheetName_() });
     return json_({ ok: false, error: 'unknown_action' });
   } catch (err) {
@@ -54,65 +56,33 @@ function doPost(e) {
 
 /* ---------- lookup ---------- */
 
-function lookup_(name, code) {
+function lookup_(name, pw) {
+  if (!pwOk_(pw)) return { ok: false, error: 'bad_password' };
   var q = norm_(name);
-  code = String(code || '').replace(/\D/g, '');
   if (q.split(' ').length < 2) return { ok: false, error: 'need_full_name' };
-  if (code.length !== 6) return { ok: false, error: 'need_code' };
   var cache = CacheService.getScriptCache(), key = 'tries_' + Utilities.base64EncodeWebSafe(q).slice(0, 200);
   var tries = Number(cache.get(key) || 0);
   if (tries >= 10) return { ok: false, error: 'too_many' };
-  var t = table_();
-  var hit = -1;
+  var t = table_(), hits = [];
   t.rows.forEach(function (r, i) {
-    if (hit > -1) return;
     var first = norm_(r[t.c.first]), last = norm_(r[t.c.last]), nick = norm_(r[t.c.nick]);
     var p1 = norm_(r[t.c.p1first] + ' ' + r[t.c.p1last]);
     if (!first && !last) return;
-    var names = [first + ' ' + last];
-    if (nick) names.push(nick + ' ' + last);
-    if (p1.trim()) names.push(p1);
-    if (names.indexOf(q) > -1 && String(r[t.c.code]).replace(/\D/g, '') === code) hit = i;
+    if (q === first + ' ' + last || (nick && q === nick + ' ' + last)) hits.push({ i: i, role: 'guest' });
+    else if (p1 && q === p1) hits.push({ i: i, role: 'plus' });
   });
-  if (hit < 0) { cache.put(key, String(tries + 1), 3600); return { ok: false, error: 'no_match' }; }
+  if (!hits.length) { cache.put(key, String(tries + 1), 3600); return { ok: false, error: 'no_match' }; }
+  if (hits.length > 1) return { ok: false, error: 'duplicate' };
   cache.remove(key);
-  return { ok: true, party: party_(t, hit), closed: isClosed_() };
+  var party = party_(t, hits[0].i);
+  party.role = hits[0].role;
+  return { ok: true, party: party, closed: isClosed_() };
 }
 
-/** 6-digit passcode derived from the guest's phone number (stable), unique within the tab. */
-function makeCode_(phone, salt, used) {
-  var props = PropertiesService.getScriptProperties();
-  var s = props.getProperty('SECRET');
-  if (!s) { s = Utilities.getUuid(); props.setProperty('SECRET', s); }
-  var base = String(phone || '').replace(/\D/g, '') || ('row' + salt);
-  for (var n = 0; n < 50; n++) {
-    var h = Utilities.computeHmacSha256Signature(base + '|' + n, s);
-    var v = ((h[0] & 255) * 16777216 + (h[1] & 255) * 65536 + (h[2] & 255) * 256 + (h[3] & 255)) % 900000 + 100000;
-    var c = String(v);
-    if (!used[c]) { used[c] = true; return c; }
-  }
-  throw new Error('Could not make a unique passcode');
-}
-
-/** Fills the Passcode column for every guest that doesn't have one yet. */
-function fillPasscodes_(sheetName) {
-  var sh = ss_().getSheetByName(sheetName);
-  if (!sh) return 0;
-  var width = sh.getLastColumn(), last = sh.getLastRow();
-  var head = sh.getRange(HEADER_ROW, 1, 1, width).getValues()[0].map(function (h) { return String(h).trim(); });
-  var ci = head.indexOf(COLS.code), fi = head.indexOf(COLS.first), pi = head.indexOf(COLS.phone);
-  if (ci < 0 || last <= HEADER_ROW) return 0;
-  var vals = sh.getRange(HEADER_ROW + 1, 1, last - HEADER_ROW, width).getDisplayValues();
-  var used = {}, made = 0;
-  vals.forEach(function (r) { if (r[ci]) used[String(r[ci]).replace(/\D/g, '')] = true; });
-  var out = vals.map(function (r, i) {
-    if (r[ci] || !String(r[fi]).trim()) return [r[ci]];
-    made++; return [makeCode_(r[pi], i, used)];
-  });
-  var rng = sh.getRange(HEADER_ROW + 1, ci + 1, out.length, 1);
-  rng.setNumberFormat('@');
-  rng.setValues(out);
-  return made;
+/** The one website password, kept in the Website Settings tab ("Website password"). */
+function pwOk_(pw) {
+  var want = String(setting_('Website password', '0525')).trim().toLowerCase();
+  return want !== '' && String(pw || '').trim().toLowerCase() === want;
 }
 
 function party_(t, i) {
@@ -167,7 +137,8 @@ function submit_(b) {
 
     var party = { first: String(r[t.c.first]).trim(), last: String(r[t.c.last]).trim(),
       p1: hasP1 ? (String(r[t.c.p1first]).trim() + ' ' + String(r[t.c.p1last] || '').trim()).trim() : '',
-      status: attending, p1status: p1, message: msg, email: String(r[t.c.email] || '').trim(), updated: !!prev };
+      status: attending, p1status: p1, message: msg, email: String(r[t.c.email] || '').trim(), updated: !!prev,
+      byPlus: hasP1 && b.by === 'plus' };
 
     var sent = '';
     try { if (party.email) { sendGuest_(party); sent = 'Sent ' + now; } else { sent = 'No email on file'; } }
@@ -192,7 +163,7 @@ function sendGuest_(p) {
     ? 'We are so happy you\'ll be celebrating with us in Bali, May 23 to 26, 2027.'
     : 'We\'re sorry you can\'t make it, and we\'ll miss you. Thank you for letting us know.';
   var html = shell_(
-    '<p style="margin:0 0 6px;font-size:18px">Dear ' + esc_(p.first) + ',</p>' +
+    '<p style="margin:0 0 6px;font-size:18px">Dear ' + esc_(p.p1 ? p.first + ' & ' + p.p1.split(' ')[0] : p.first) + ',</p>' +
     '<p style="margin:0 0 18px">' + intro + (p.updated ? ' Your updated response is below.' : ' Here\'s what we received:') + '</p>' +
     '<table style="width:100%;border-collapse:collapse;margin:0 0 18px">' + lines.join('') + '</table>' +
     (p.message ? '<p style="margin:0 0 18px;font-style:italic">Your note: "' + esc_(p.message) + '"</p>' : '') +
@@ -206,9 +177,10 @@ function notifyCouple_(p, when) {
   var to = setting_('Send new-RSVP alerts to', '');
   if (!to) return;
   var who = p.first + ' ' + p.last;
+  var by = p.byPlus ? p.p1 + ' (plus one of ' + who + ')' : who;
   var subject = (p.updated ? 'RSVP updated: ' : 'New RSVP: ') + who + ' (' + p.status + (p.p1 ? ', +1 ' + (p.p1status === 'Attending' ? 'yes' : 'no') : '') + ')';
   var html = shell_(
-    '<p style="margin:0 0 14px">' + esc_(who) + (p.updated ? ' updated their RSVP' : ' just RSVP\'d') + ' on ' + esc_(when) + '.</p>' +
+    '<p style="margin:0 0 14px">' + esc_(by) + (p.updated ? ' updated their RSVP' : ' just RSVP\'d') + ' on ' + esc_(when) + '.</p>' +
     '<table style="width:100%;border-collapse:collapse;margin:0 0 14px">' + row_(who, p.status) + (p.p1 ? row_(p.p1 + ' (plus one)', p.p1status) : '') + '</table>' +
     (p.message ? '<p style="margin:0 0 14px;font-style:italic">"' + esc_(p.message) + '"</p>' : '') +
     '<p style="margin:0">Live count: ' + esc_(countLine_()) + '</p>' +
@@ -331,31 +303,22 @@ function onOpen() {
     .addItem('Which tab is live?', 'menuWhich')
     .addItem('Switch website to the TEST tab', 'menuTest')
     .addItem('Switch website to the real RSVP Tracker', 'menuLive')
-    .addSeparator()
-    .addItem('Create passcodes for new guests', 'menuCodes')
     .addToUi();
 }
 function menuWhich() { SpreadsheetApp.getUi().alert('The website is reading and writing: "' + sheetName_() + '"\n\n' + countLine_()); }
 function menuTest() { setSetting_('Live tab', 'TEST RSVP Tracker'); menuWhich(); }
-function menuCodes() {
-  var n = fillPasscodes_(sheetName_());
-  SpreadsheetApp.getUi().alert(n ? 'Created ' + n + ' new passcode(s) on "' + sheetName_() + '".' : 'Every guest on "' + sheetName_() + '" already has a passcode.');
-}
 function menuLive() { setSetting_('Live tab', 'RSVP Tracker'); menuWhich(); }
 
-/** Runs every hour: gives any new guest on either tab a passcode. */
+/** Old hourly passcode job: passcodes are gone, so it just removes its own trigger. */
 function autoPasscodes() {
-  fillPasscodes_('TEST RSVP Tracker');
-  fillPasscodes_('RSVP Tracker');
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'autoPasscodes') ScriptApp.deleteTrigger(t); });
 }
 
-/** Run once from the editor to grant permissions, create passcodes and install the hourly passcode job. */
+/** Run once from the editor to grant permissions. */
 function setup() {
   var p = PropertiesService.getScriptProperties();
   if (!p.getProperty('FROM_NAME')) p.setProperty('FROM_NAME', 'Ankur & Soumya');
   sign_(4, 'a', 'b');
-  var hasTrigger = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'autoPasscodes'; });
-  if (!hasTrigger) ScriptApp.newTrigger('autoPasscodes').timeBased().everyHours(1).create();
   autoPasscodes();
   Logger.log('Live tab: ' + sheetName_() + ' | ' + countLine_() + ' | mail quota left: ' + MailApp.getRemainingDailyQuota());
 }
