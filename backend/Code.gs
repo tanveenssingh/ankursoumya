@@ -19,7 +19,7 @@ var SHEET_ID = '1dhXm5g0u0N9XoH1SrlfSVOe9u_Qx7x8aUYbk92F5Go0';
 var SETTINGS_TAB = 'Website Settings';
 
 var HEADER_ROW = 3;
-var DEADLINE = new Date('2026-12-16T00:00:00+08:00'); // responses accepted through Dec 15
+var DEADLINE = new Date('2027-01-01T00:00:00+08:00'); // responses accepted through Dec 31
 var SITE = 'https://ankursoumya.com';
 
 var COLS = {
@@ -196,7 +196,7 @@ function sendGuest_(p) {
     '<p style="margin:0 0 18px">' + intro + (p.updated ? ' Your updated response is below.' : ' Here\'s what we received:') + '</p>' +
     '<table style="width:100%;border-collapse:collapse;margin:0 0 18px">' + lines.join('') + '</table>' +
     (p.message ? '<p style="margin:0 0 18px;font-style:italic">Your note: "' + esc_(p.message) + '"</p>' : '') +
-    '<p style="margin:0 0 18px">Need to change anything? Just RSVP again at <a href="' + SITE + '/rsvp/" style="color:#5A1A1E">ankursoumya.com/rsvp</a> before December 15, 2026.</p>' +
+    '<p style="margin:0 0 18px">Need to change anything? Just RSVP again at <a href="' + SITE + '/rsvp/" style="color:#5A1A1E">ankursoumya.com/rsvp</a> before December 31, 2026.</p>' +
     (yes ? '<p style="margin:0">Schedule, travel tips and everything else are on <a href="' + SITE + '" style="color:#5A1A1E">ankursoumya.com</a>.</p>' : '') +
     '<p style="margin:22px 0 0">With love,<br>Ankur &amp; Soumya</p>');
   send_(p.email, subject, html, plain_(html));
