@@ -24,10 +24,10 @@ var DEADLINE = new Date('2027-01-01T00:00:00+08:00'); // responses accepted thro
 var SITE = 'https://ankursoumya.com';
 
 var COLS = {
-  first: 'First Name', last: 'Last Name', nick: 'Nick Name', email: 'Email', phone: 'WhatsApp Phone Number',
+  first: 'First Name', last: 'Last Name',
   p1first: 'Plus One First Name', p1last: 'Plus One Last Name',
   status: 'RSVP Status', p1status: 'Plus One RSVP', message: 'Message to Couple',
-  respondedAt: 'Responded At', confirmation: 'Confirmation Sent'
+  respondedAt: 'Responded At'
 };
 
 /* ---------- web app entry points ---------- */
@@ -63,20 +63,31 @@ function lookup_(name, pw) {
   var cache = CacheService.getScriptCache(), key = 'tries_' + Utilities.base64EncodeWebSafe(q).slice(0, 200);
   var tries = Number(cache.get(key) || 0);
   if (tries >= 10) return { ok: false, error: 'too_many' };
-  var t = table_(), hits = [];
+  var t = table_(), exact = [], loose = [];
   t.rows.forEach(function (r, i) {
-    var first = norm_(r[t.c.first]), last = norm_(r[t.c.last]), nick = norm_(r[t.c.nick]);
-    var p1 = norm_(r[t.c.p1first] + ' ' + r[t.c.p1last]);
+    var first = norm_(r[t.c.first]), last = norm_(r[t.c.last]);
     if (!first && !last) return;
-    if (q === first + ' ' + last || (nick && q === nick + ' ' + last)) hits.push({ i: i, role: 'guest' });
-    else if (p1 && q === p1) hits.push({ i: i, role: 'plus' });
+    var g = nameMatch_(q, first, last), p = nameMatch_(q, norm_(r[t.c.p1first]), norm_(r[t.c.p1last]));
+    if (g === 2) exact.push({ i: i, role: 'guest' }); else if (p === 2) exact.push({ i: i, role: 'plus' });
+    else if (g === 1) loose.push({ i: i, role: 'guest' }); else if (p === 1) loose.push({ i: i, role: 'plus' });
   });
+  var hits = exact.length ? exact : loose;
   if (!hits.length) { cache.put(key, String(tries + 1), 3600); return { ok: false, error: 'no_match' }; }
   if (hits.length > 1) return { ok: false, error: 'duplicate' };
   cache.remove(key);
   var party = party_(t, hits[0].i);
   party.role = hits[0].role;
   return { ok: true, party: party, closed: isClosed_() };
+}
+
+/** 2 = exact full name; 1 = close enough (middle name left out, or no last name in the sheet); 0 = no. */
+function nameMatch_(q, first, last) {
+  if (!first) return 0;
+  if (q === (first + ' ' + last).trim()) return 2;
+  var f1 = first.split(' ')[0];
+  if (last && q === f1 + ' ' + last) return 1;
+  if (!last && q.split(' ')[0] === f1) return 1;
+  return 0;
 }
 
 /** The one website password, kept in the Website Settings tab ("Website password"). */
@@ -89,7 +100,6 @@ function party_(t, i) {
   var r = t.rows[i], row = i + HEADER_ROW + 1;
   var p1 = String(r[t.c.p1first] || '').trim();
   var p1l = String(r[t.c.p1last] || '').trim();
-  var email = String(r[t.c.email] || '').trim();
   return {
     row: row,
     token: sign_(row, r[t.c.first], r[t.c.last]),
@@ -99,8 +109,7 @@ function party_(t, i) {
     status: String(r[t.c.status] || ''),
     plusOneStatus: String(r[t.c.p1status] || ''),
     message: String(r[t.c.message] || ''),
-    respondedAt: r[t.c.respondedAt] ? String(r[t.c.respondedAt]) : '',
-    emailHint: email ? maskEmail_(email) : ''
+    respondedAt: r[t.c.respondedAt] ? String(r[t.c.respondedAt]) : ''
   };
 }
 
@@ -137,16 +146,12 @@ function submit_(b) {
 
     var party = { first: String(r[t.c.first]).trim(), last: String(r[t.c.last]).trim(),
       p1: hasP1 ? (String(r[t.c.p1first]).trim() + ' ' + String(r[t.c.p1last] || '').trim()).trim() : '',
-      status: attending, p1status: p1, message: msg, email: String(r[t.c.email] || '').trim(), updated: !!prev,
+      status: attending, p1status: p1, message: msg, updated: !!prev,
       byPlus: hasP1 && b.by === 'plus' };
 
-    var sent = '';
-    try { if (party.email) { sendGuest_(party); sent = 'Sent ' + now; } else { sent = 'No email on file'; } }
-    catch (err) { sent = 'Failed: ' + String(err).slice(0, 120); }
-    sh.getRange(row, t.c.confirmation + 1).setValue(sent);
     try { notifyCouple_(party, now); } catch (err) { console.error(err); }
 
-    return { ok: true, status: attending, plusOneStatus: p1, emailed: sent.indexOf('Sent') === 0, emailHint: party.email ? maskEmail_(party.email) : '' };
+    return { ok: true, status: attending, plusOneStatus: p1 };
   } finally {
     lock.releaseLock();
   }
