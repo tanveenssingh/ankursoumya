@@ -190,7 +190,10 @@ function notifyCouple_(p, when) {
     (p.message ? '<p style="margin:0 0 14px;font-style:italic">"' + esc_(p.message) + '"</p>' : '') +
     '<p style="margin:0">Live count: ' + esc_(countLine_()) + '</p>' +
     '<p style="margin:12px 0 0"><a href="' + ss_().getUrl() + '" style="color:#5A1A1E">Open the RSVP sheet</a></p>');
-  send_(to, subject, html, plain_(html));
+  // one send per inbox, so a block on one address never stops the others
+  String(to).split(',').map(function (x) { return x.trim(); }).filter(String).forEach(function (addr) {
+    try { send_(addr, subject, html, plain_(html)); } catch (err) { console.error(addr + ': ' + err); }
+  });
 }
 
 function countLine_() {
