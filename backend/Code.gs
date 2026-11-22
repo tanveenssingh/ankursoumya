@@ -134,7 +134,7 @@ function submit_(b) {
       if (!p1) return { ok: false, error: 'missing_answer' };
     }
     var msg = String(b.message || '').slice(0, 1000);
-    var now = Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd HH:mm') + ' (Bali)';
+    var now = Utilities.formatDate(new Date(), 'America/Los_Angeles', 'yyyy-MM-dd h:mm a') + ' PT';
     var prev = String(r[t.c.status] || '');
 
     var sh = t.sheet, row = Number(b.row);
