@@ -285,6 +285,7 @@ footer img{width:60px;margin:0 auto 12px;opacity:.9}
 .mute{position:fixed;left:16px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:8px;font-family:var(--caps);font-size:.66rem;letter-spacing:.18em;color:var(--ink);background:rgba(251,246,234,.92);border:1px solid rgba(90,26,30,.25);border-radius:30px;padding:9px 14px 9px 11px;cursor:pointer;box-shadow:0 6px 18px rgba(90,26,30,.15);animation:lockin .5s ease both}
 .mute svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .mute[hidden]{display:none}
+.mute.off svg path:last-child{display:none}
 /* site password gate */
 .lock{display:none}
 html.locked body>*:not(.lock){display:none!important}
@@ -623,16 +624,21 @@ html.locked .lock{display:grid;position:fixed;inset:0;z-index:100;place-items:ce
     [].forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===cur)});
     scap.textContent=names[cur]+(cur===0?' · tap play, swipe or use the arrows · tap a card to enlarge':' · '+(cur+1)+' of '+slides.length)}
   // envelope sequence
-  // entry music: plays once each time the envelope is tapped open
-  var music=new Audio('audio/entry.mp3'),mute=document.getElementById('mute');music.preload='auto';
-  function stopMusic(){music.pause();mute.hidden=true}
-  music.addEventListener('ended',function(){mute.hidden=true});
-  mute.addEventListener('click',stopMusic);
+  // music: starts when the envelope is tapped, loops while the invitation cards are on screen,
+  // pauses when the guest scrolls away and resumes when they come back (unless they turned it off)
+  var music=new Audio('audio/entry.mp3'),mute=document.getElementById('mute'),inv=document.getElementById('invitation');
+  music.preload='auto';music.loop=true;
+  var musicOn=false,muted=false,inView=true;
+  function setMuteLabel(){mute.lastChild.nodeValue=muted?'Play music':'Stop music';mute.setAttribute('aria-label',muted?'Play the music':'Stop the music');mute.classList.toggle('off',muted)}
+  function syncMusic(){if(!musicOn)return;mute.hidden=!inView;
+    if(inView&&!muted){var pr=music.play();if(pr&&pr.catch)pr.catch(function(){})}else music.pause()}
+  mute.addEventListener('click',function(){muted=!muted;setMuteLabel();syncMusic()});
+  if('IntersectionObserver' in window)new IntersectionObserver(function(es){inView=es[0].isIntersecting;syncMusic()},{threshold:0.15}).observe(inv);
   function open(){
     if(opened)return;opened=true;
     document.getElementById('skip').style.display='none';
-    try{music.currentTime=0;var pr=music.play();mute.hidden=false;if(pr&&pr.catch)pr.catch(function(){mute.hidden=true})}catch(e){}env.removeAttribute('role');env.removeAttribute('tabindex');
-    if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock();return}
+    try{music.currentTime=0;musicOn=true;muted=false;setMuteLabel();syncMusic()}catch(e){}env.removeAttribute('role');env.removeAttribute('tabindex');
+    if(reduce){stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock();autoCards();return}
     var drop=env.offsetHeight*.76,y0=window.scrollY,t0=performance.now(),root=document.documentElement,sb=root.style.scrollBehavior;
     root.style.scrollBehavior='auto';env.style.transition='none';
     (function step(now){var t=Math.min(1,(now-t0)/1100),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -651,10 +657,11 @@ html.locked .lock{display:grid;position:fixed;inset:0;z-index:100;place-items:ce
       slider.style.transition='';
       slider.style.transform='translate(0,0) scale(1)';
       var st=stage.getBoundingClientRect().top;if(st<16)window.scrollBy({top:st-16,behavior:'smooth'});
-      setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0);unlock()},1150);
+      setTimeout(function(){stage.classList.add('done');slider.style.transform='';go(0);unlock();autoCards()},1150);
     },3850);
   }
   function unlock(){document.documentElement.classList.remove('gated')}
+  function autoCards(){if(!timer)play()}
   document.getElementById('skip').addEventListener('click',function(){opened=true;env.removeAttribute('role');env.removeAttribute('tabindex');stage.classList.add('drop','open','unfold','rise','grow','done');slider.style.transform='';go(0);unlock()});
   env.addEventListener('click',open);
   env.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
